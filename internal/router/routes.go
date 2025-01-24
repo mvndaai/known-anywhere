@@ -8,7 +8,12 @@ import (
 )
 
 func StartServer() {
-	NewRoute(http.MethodGet, "/", ListRoutesHandler)
+
+	// Load html files
+	// https://codeandlife.com/2022/02/12/combine-golang-and-sveltekit-for-gui/
+	http.Handle("/", http.FileServer(http.Dir("./frontend/static")))
+
+	NewRoute(http.MethodGet, "/api", ListRoutesHandler)
 	NewRoute(http.MethodGet, "/status", statusHandler)
 	NewRoute(http.MethodGet, "/test/error", testErrorHandler)
 
