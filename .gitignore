@@ -23,10 +23,12 @@ go.work.sum
 
 # env file
 .env
-
+docker/private_local_vars.sh
 # binary
 known-socially
-known-socially.exe
 
 # volumes
-volumes
+docker/volumes
+
+# MacOS finder file
+.DS_Store
