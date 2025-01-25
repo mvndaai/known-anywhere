@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 
+	"github.com/mvndaai/ctxerr"
 	"github.com/mvndaai/known-socially/internal/db"
 	"github.com/mvndaai/known-socially/internal/router"
 )
@@ -13,7 +14,8 @@ func main() {
 	db := db.Postgres{}
 	err := db.Connect(ctx)
 	if err != nil {
-		panic(err)
+		ctxerr.Handle(err)
+		return
 	}
 	defer db.Close(ctx)
 
