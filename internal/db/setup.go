@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 
 	_ "github.com/lib/pq"
@@ -77,8 +76,8 @@ func (pg *Postgres) CreateTables(ctx context.Context) error {
 	tables := []string{
 		`users (
 			id uuid DEFAULT uuidv7(),
-    		username VARCHAR NOT NULL,
-    		PRIMARY KEY (id)
+			username VARCHAR NOT NULL,
+			PRIMARY KEY (id)
 		)`,
 		`sso (
 			id uuid DEFAULT uuidv7(),
@@ -91,9 +90,9 @@ func (pg *Postgres) CreateTables(ctx context.Context) error {
 
 	for i, table := range tables {
 		q := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s", table)
-		log.Println(q)
 		_, err = pg.db.ExecContext(ctx, q)
 		if err != nil {
+			ctx = ctxerr.SetField(ctx, "query", q)
 			return ctxerr.Wrap(ctx, err, "930187a3-bb61-4f6f-ae1f-3d54b700aff0", "Failed to create table:", i)
 		}
 	}

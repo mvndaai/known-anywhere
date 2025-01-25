@@ -11,7 +11,7 @@ const config = {
 		adapter: adapter({
 			pages: '../static',
 			assets: '../static',
-			fallback: 'app.html' // may differ from host to host
+			//fallback: '/api' // may differ from host to host
 		})
 	}
 };

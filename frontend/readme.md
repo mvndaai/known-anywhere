@@ -37,3 +37,4 @@ http://localhost:5173/demo/paraglide
 ```
 
 https://svelte.dev/docs/kit/adapter-static
+https://khromov.se/the-missing-guide-to-understanding-adapter-static-in-sveltekit/
