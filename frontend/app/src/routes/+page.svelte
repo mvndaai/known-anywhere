@@ -64,7 +64,7 @@
         console.log(response);
         const j = await response.json();
         console.log(j);
-    }}>Generate</button>
+    }}>Test Auth</button>
 </div>
 
 <h2>Routes</h2>

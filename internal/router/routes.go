@@ -3,6 +3,7 @@ package router
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/mvndaai/ctxerr"
 	"github.com/mvndaai/known-socially/internal/jwt"
@@ -15,11 +16,15 @@ func StartServer() {
 	// https://codeandlife.com/2022/02/12/combine-golang-and-sveltekit-for-gui/
 	http.Handle("/", http.FileServer(http.Dir("./frontend/static")))
 
-	NewRoute(http.MethodGet, "/api", ListRoutesHandler)
 	NewRoute(http.MethodGet, "/status", statusHandler)
-	NewRoute(http.MethodGet, "/test/error", testErrorHandler)
-	NewRoute(http.MethodPost, "/test/jwt", testCreateJWTHandler)
-	NewRoute(http.MethodGet, "/test/auth", statusHandler, JWTMiddleware)
+
+	env := os.Getenv("ENVIROMENT")
+	if env == "dev" {
+		NewRoute(http.MethodGet, "/api", ListRoutesHandler)
+		NewRoute(http.MethodGet, "/test/error", testErrorHandler)
+		NewRoute(http.MethodPost, "/test/jwt", testCreateJWTHandler)
+		NewRoute(http.MethodGet, "/test/auth", statusHandler, JWTMiddleware)
+	}
 
 	port := GetPort()
 	log.Println("Starting server at http://localhost" + port)
