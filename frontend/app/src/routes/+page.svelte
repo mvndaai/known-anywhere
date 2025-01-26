@@ -15,11 +15,12 @@
 
     const ls = (typeof window !== 'undefined') ? window.localStorage : null;
 
-
     let subject = $state(ls?.getItem('subject') || '');
     let username = $state(ls?.getItem('username') || '');
     let days = $state(ls?.getItem('days') || 5);
     const generateJWT = async () => {
+        ls?.setItem('subject', subject);
+        ls?.setItem('username', username);
         const response = await fetch(`${backend}/test/jwt`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -30,10 +31,10 @@
             }),
         });
         const j = await response.json();
-        ls?.setItem('subject', subject);
-        ls?.setItem('username', username);
-        ls?.setItem('jwt', j.data);
         //console.log(j);
+        if (response.status === 200) {
+            ls?.setItem('jwt', j.data);
+        }
     }
 </script>
 
@@ -55,7 +56,7 @@
     <span>Create JWT</span>
     <input bind:value={subject} type="text" placeholder="Subject"/>
     <input bind:value={username} type="text" placeholder="Username"/>
-    <input bind:value={days} type="text" placeholder="Username"/>
+    <input bind:value={days} type="number" placeholder="Expiration"/>
     <button onclick={generateJWT}>Generate</button>
 </div>
 
