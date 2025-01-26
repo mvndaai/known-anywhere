@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/mvndaai/ctxerr"
 	ctxerrhttp "github.com/mvndaai/ctxerr/http"
@@ -39,10 +40,9 @@ func NewRoute(method, path string, wf WraperFunc) {
 		data, meta, status, err := wf(r)
 		if err != nil {
 			ctxerr.Handle(err)
-			showMessage := true
-			showFields := true
+			debugErrors, _ := strconv.ParseBool(os.Getenv("DEBUG_ERRORS"))
 			var errorResp ctxerrhttp.ErrorResponse
-			status, errorResp = ctxerrhttp.StatusCodeAndResponse(err, showMessage, showFields)
+			status, errorResp = ctxerrhttp.StatusCodeAndResponse(err, debugErrors, debugErrors)
 			ret.Error = &errorResp.Error
 		} else {
 			ret.Success = true

@@ -7,7 +7,7 @@ import (
 )
 
 func loginsHandler(r *http.Request) (data, meta any, status int, _ error) {
-	return nil, nil, http.StatusBadGateway, ctxerr.New(r.Context(), "c691a249-1413-407d-a309-b44d52eb51ac", "test error")
+	return nil, nil, http.StatusBadGateway, ctxerr.New(r.Context(), "82bd850e-23aa-4fe0-8b9b-801aab34de0a", "test error")
 }
 
 // https://work.meta.com/help/624731485413747?helpref=faq_content
