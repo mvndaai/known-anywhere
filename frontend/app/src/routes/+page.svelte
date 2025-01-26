@@ -38,19 +38,11 @@
     }
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
 
-<h1>Routes</h1>
-{#each Object.entries(routes) as [method, rs]}
-    <p>{method}</p>
-    <ul>
-        {#each rs as route}
-            <li><a href='{route}'>{route}</a></li>
-        {/each}
-    </ul>
-{/each}
+<h1>Known Socially</h1>
 
+
+<a href="./admin">Admin</a>
 
 <div>
     <span>Create JWT</span>
@@ -74,3 +66,16 @@
         console.log(j);
     }}>Generate</button>
 </div>
+
+<h2>Routes</h2>
+{#each Object.entries(routes) as [method, rs]}
+    <p>{method}</p>
+    <ul>
+        {#each rs as route}
+            <li><a href='{route}'>{route}</a></li>
+        {/each}
+    </ul>
+{/each}
+
+<h2>Welcome to SvelteKit</h2>
+<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
