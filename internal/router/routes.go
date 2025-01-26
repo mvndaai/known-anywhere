@@ -17,10 +17,11 @@ func StartServer() {
 	http.Handle("/", http.FileServer(http.Dir("./frontend/static")))
 
 	NewRoute(http.MethodGet, "/status", statusHandler)
+	NewRoute(http.MethodGet, "/api", ListRoutesHandler)
 
-	env := os.Getenv("ENVIROMENT")
+	env := os.Getenv("ENVIRONMENT")
 	if env == "dev" {
-		NewRoute(http.MethodGet, "/api", ListRoutesHandler)
+		// TODO make a better mux
 		NewRoute(http.MethodGet, "/test/error", testErrorHandler)
 		NewRoute(http.MethodPost, "/test/jwt", testCreateJWTHandler)
 		NewRoute(http.MethodGet, "/test/auth", statusHandler, JWTMiddleware)
