@@ -29,6 +29,9 @@ func issuer() string {
 }
 func secret() []byte {
 	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		panic("JWT_SECRET not set")
+	}
 	return []byte(secret)
 }
 
@@ -70,6 +73,11 @@ func (c *JWTClaims) Normalize(ctx context.Context) {
 }
 
 func (c *JWTClaims) EnsureClaims(ctx context.Context, method, path string, params url.Values, aud string) error {
+	ctx = ctxerr.SetField(ctx, "method", method)
+	ctx = ctxerr.SetField(ctx, "path", path)
+	ctx = ctxerr.SetField(ctx, "params", params)
+	_ = aud // TODO: use aud
+
 	if c == nil {
 		return ctxerr.New(ctx, "1a071b29-4c11-41ca-b765-7e50bd7227ad", "nil claims")
 	}
@@ -87,19 +95,16 @@ func (c *JWTClaims) EnsureClaims(ctx context.Context, method, path string, param
 	return nil
 }
 
-func GetJWTClaims(r http.Request) (*JWTClaims, error) {
+func GetJWTClaims(r *http.Request) (*JWTClaims, error) {
 	ctx := r.Context()
-	secret := secret()
-
 	jwtToken := strings.TrimPrefix(r.Header.Get(HeaderAuthorization), HeaderAuthorizationPrefix)
-
 	claims := &JWTClaims{}
 	_, err := jwt.ParseWithClaims(jwtToken, claims, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
 			return "", ctxerr.NewHTTP(ctx, "e4cd2a10-e084-4186-85a5-1788fcfad945", "", http.StatusUnauthorized, "bad token signing method")
 		}
-		return secret, nil
+		return secret(), nil
 	})
 	if err != nil {
 		return nil, ctxerr.WrapHTTP(ctx, err, "a6c3217d-0f6b-4153-8789-128e5cefc43d", err.Error(), http.StatusUnauthorized)

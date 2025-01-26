@@ -18,17 +18,18 @@
 
     let subject = $state(ls?.getItem('subject') || '');
     let username = $state(ls?.getItem('username') || '');
-    let generateJWT = async () => {
+    let days = $state(ls?.getItem('days') || 5);
+    const generateJWT = async () => {
         const response = await fetch(`${backend}/test/jwt`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body:  JSON.stringify({
                 'sub': subject,
                 'username': username,
-                'exp': Math.floor(new Date().setDate(new Date().getDate() + 5) / 1000),
+                'exp': Math.floor(new Date().setDate(new Date().getDate() + days) / 1000),
             }),
         });
-        let j = await response.json();
+        const j = await response.json();
         ls?.setItem('subject', subject);
         ls?.setItem('username', username);
         ls?.setItem('jwt', j.data);
@@ -54,5 +55,21 @@
     <span>Create JWT</span>
     <input bind:value={subject} type="text" placeholder="Subject"/>
     <input bind:value={username} type="text" placeholder="Username"/>
+    <input bind:value={days} type="text" placeholder="Username"/>
     <button onclick={generateJWT}>Generate</button>
+</div>
+
+<div>
+    <span>Test JWT auth</span>
+    <button onclick={async () => {
+        const jwt = ls?.getItem('jwt');
+        console.log(jwt);
+
+        const response = await fetch(`${backend}/test/auth`, {
+            headers: {'Authorization': `Bearer ${jwt}`},
+        });
+        console.log(response);
+        const j = await response.json();
+        console.log(j);
+    }}>Generate</button>
 </div>

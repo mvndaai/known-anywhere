@@ -25,13 +25,13 @@ type (
 
 type WraperFunc (func(r *http.Request) (data, meta any, status int, _ error))
 
-func NewRoute(method, path string, wf WraperFunc) {
+func NewRoute(method, path string, wf WraperFunc, middleware ...func(http.Handler) http.Handler) {
 	if _, ok := routes[method]; !ok {
 		routes[method] = make([]string, 0)
 	}
 	routes[method] = append(routes[method], path)
 
-	http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// TODO add options
 		if r.Method != method {
 			return
@@ -58,7 +58,13 @@ func NewRoute(method, path string, wf WraperFunc) {
 		if status != 0 && status != http.StatusOK {
 			w.WriteHeader(status)
 		}
-	})
+	}))
+
+	for _, m := range middleware {
+		handler = m(handler)
+	}
+
+	http.Handle(path, handler)
 }
 
 func ListRoutesHandler(r *http.Request) (data, meta any, status int, _ error) {

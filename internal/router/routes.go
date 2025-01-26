@@ -19,6 +19,7 @@ func StartServer() {
 	NewRoute(http.MethodGet, "/status", statusHandler)
 	NewRoute(http.MethodGet, "/test/error", testErrorHandler)
 	NewRoute(http.MethodPost, "/test/jwt", testCreateJWTHandler)
+	NewRoute(http.MethodGet, "/test/auth", statusHandler, JWTMiddleware)
 
 	port := GetPort()
 	log.Println("Starting server at http://localhost" + port)
