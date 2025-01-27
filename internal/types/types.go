@@ -1,0 +1,121 @@
+package types
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
+	"reflect"
+	"strconv"
+	"strings"
+
+	"github.com/google/uuid"
+	"github.com/mvndaai/ctxerr"
+)
+
+func JSONTag(a any, name string) string {
+	typeOf := reflect.TypeOf(a)
+	switch typeOf.Kind() {
+	case reflect.Struct:
+		for i := range typeOf.NumField() {
+			if typeOf.Field(i).Name == name {
+				return typeOf.Field(i).Tag.Get("json")
+			}
+		}
+	}
+	panic(fmt.Sprintf("field %s not found", name))
+}
+
+type (
+	Pagination struct {
+		Limit  int    `json:"limit"`
+		Cursor string `json:"cursor"`
+	}
+
+	PaginationResponse struct {
+		Total  int    `json:"total"`
+		Cursor string `json:"cursor"`
+	}
+)
+
+func (p *Pagination) Normalize() {
+	if p.Limit == 0 {
+		p.Limit = 10
+	}
+	p.Cursor = strings.TrimSpace(p.Cursor)
+}
+
+func (p *Pagination) Fill(ctx context.Context, q url.Values) error {
+	var err error
+	key := JSONTag(*p, "Limit")
+	if v := strings.TrimSpace(q.Get(key)); v != "" {
+		p.Limit, err = strconv.Atoi(v)
+		if err != nil {
+			ctx = ctxerr.SetField(ctx, key, v)
+			return ctxerr.NewHTTP(ctx, "da799ef8-f059-4794-90e2-d5a1cff2886e", "invalid limit", http.StatusBadRequest, "invalid limit")
+		}
+	}
+	p.Cursor = q.Get(JSONTag(*p, "Cursor"))
+	p.Normalize()
+	return nil
+}
+
+type (
+	DomainCreate struct {
+		DisplayName string `json:"display_name"`
+		Description string `json:"description"`
+		Notes       string `json:"notes"`
+	}
+
+	Domain struct {
+		ID uuid.UUID `json:"id"`
+		DomainCreate
+	}
+
+	DomainLink struct {
+		DomainID    uuid.UUID `json:"domain_id"`
+		Link        string    `json:"link"`
+		CountryCode string    `json:"country_code"`
+	}
+
+	DomainList struct {
+		Pagination Pagination   `json:"pagination"`
+		Filters    DomainCreate `json:"filters"`
+	}
+)
+
+func (dc DomainCreate) Validate(ctx context.Context) error {
+	var err error
+	if dc.DisplayName == "" {
+		err = errors.Join(err, ctxerr.NewHTTP(ctx, "56f79cb4-b081-4447-b0fe-a0317d57f809", "missing display_name", http.StatusBadRequest, "missing display_name"))
+	}
+	return ctxerr.QuickWrap(ctx, err)
+}
+
+func (dl DomainLink) Validate(ctx context.Context) error {
+	var err error
+	if dl.Link == "" {
+		err = errors.Join(err, ctxerr.NewHTTP(ctx, "c4173215-7a81-467f-ac8b-0dc525074bd0", "missing link", http.StatusBadRequest, "missing link"))
+	}
+	return ctxerr.QuickWrap(ctx, err)
+}
+
+func (dl *DomainList) Normalize() {
+	dl.Filters.DisplayName = strings.TrimSpace(dl.Filters.DisplayName)
+	dl.Filters.Description = strings.TrimSpace(dl.Filters.Description)
+	dl.Filters.Notes = strings.TrimSpace(dl.Filters.Notes)
+	dl.Pagination.Normalize()
+}
+
+func (dl *DomainList) Fill(ctx context.Context, q url.Values) error {
+	dl.Filters.DisplayName = q.Get(JSONTag(dl.Filters, "DisplayName"))
+	dl.Filters.Description = q.Get(JSONTag(dl.Filters, "Description"))
+	dl.Filters.Notes = q.Get(JSONTag(dl.Filters, "Notes"))
+	err := dl.Pagination.Fill(ctx, q)
+	if err != nil {
+		return ctxerr.QuickWrap(ctx, err)
+	}
+	dl.Normalize()
+	return nil
+}

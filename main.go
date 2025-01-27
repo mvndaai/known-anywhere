@@ -1,3 +1,5 @@
+//go:generate go run ./scripts/error_codes/error_codes.go format=uuid
+
 package main
 
 import (
@@ -19,5 +21,9 @@ func main() {
 	}
 	defer db.Close(ctx)
 
-	router.StartServer()
+	err = router.StartServer()
+	if err != nil {
+		ctxerr.Handle(err)
+		return
+	}
 }
