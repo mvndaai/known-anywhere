@@ -33,6 +33,7 @@ func StartServer() error {
 		NewRoute(http.MethodPost, "/test/jwt", testCreateJWTHandler)
 		NewRoute(http.MethodGet, "/test/auth", statusHandler, JWTMiddleware)
 
+		// TODO
 		// Most get/list routes are unprotected
 		NewRoute(http.MethodGet, "/api/domain", h.domainListHandler)
 		//NewRoute(http.MethodGet, "/api/domain/{id}", h.domainGetHandler)

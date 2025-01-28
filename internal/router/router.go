@@ -55,6 +55,7 @@ func NewRoute(method, path string, wf WraperFunc, middleware ...func(http.Handle
 			ctxerr.Handle(ctxerr.Wrap(r.Context(), err, "8e9ba72c-7279-42bd-b01d-7d453b7915a3", "writing response"))
 		}
 
+		// TODO figure out why this is always 200
 		if status != 0 && status != http.StatusOK {
 			w.WriteHeader(status)
 		}

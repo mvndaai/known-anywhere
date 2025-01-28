@@ -3,10 +3,8 @@ package db
 import (
 	"context"
 	"database/sql"
-	"database/sql/driver"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/mvndaai/ctxerr"
 )
@@ -21,10 +19,6 @@ func (pg *Postgres) Connect(ctx context.Context) error {
 	un := os.Getenv("POSTGRES_USER")
 	pw := os.Getenv("POSTGRES_PASSWORD")
 	dbname := os.Getenv("POSTGRES_DB")
-	//dbport := os.Getenv("POSTGRES_PORT")
-	//if dbport == "" {
-	//	dbport = "5432"
-	//}
 	sslmode := os.Getenv("POSTGRES_SSLMODE")
 	if sslmode == "" {
 		sslmode = "disable"
@@ -54,36 +48,35 @@ func (pg *Postgres) Close(ctx context.Context) error {
 	return nil
 }
 
-type (
-	NullScannerValuer interface {
-		driver.Valuer
-		sql.Scanner
-	}
-	NullBase struct {
-		NullScanner NullScannerValuer // The temporary dest &sql.Null*{} type, must be pointer
-		Dest        interface{}       // The final dest, must be pointer
-	}
-)
+type varCount struct {
+	i int
+}
 
-func Nullable(d any) *NullBase {
-	switch d.(type) {
-	case *string:
-		return &NullBase{Dest: d, NullScanner: &sql.NullString{}}
-	case *int32:
-		return &NullBase{Dest: d, NullScanner: &sql.NullInt32{}}
-	case *int64, *int:
-		return &NullBase{Dest: d, NullScanner: &sql.NullInt64{}}
-	case *int16:
-		return &NullBase{Dest: d, NullScanner: &sql.NullInt16{}}
-	case *byte:
-		return &NullBase{Dest: d, NullScanner: &sql.NullByte{}}
-	case *float64:
-		return &NullBase{Dest: d, NullScanner: &sql.NullFloat64{}}
-	case *bool:
-		return &NullBase{Dest: d, NullScanner: &sql.NullBool{}}
-	case *time.Time:
-		return &NullBase{Dest: d, NullScanner: &sql.NullTime{}}
+func (vc *varCount) Next() string {
+	vc.i++
+	return fmt.Sprintf("$%d", vc.i)
+}
+
+type nullable[T any] struct {
+	value T
+	fn    func(T)
+}
+
+func (n *nullable[T]) Scan(value interface{}) error {
+	if value == nil {
+		var zero T
+		n.fn(zero)
+		return nil
 	}
-	panic("unknown type")
-	//return &NullBase{Dest: d, NullScanner: &sql.Null{}} // TODO maybe figure out using this generic type
+	switch v := value.(type) {
+	case T:
+		n.fn(v)
+		return nil
+	default:
+		return fmt.Errorf("unsupported type: %T", value)
+	}
+}
+
+func NullableScan[T any](fn func(T)) *nullable[T] {
+	return &nullable[T]{fn: fn}
 }
