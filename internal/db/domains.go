@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"log"
 	"strings"
 
 	"github.com/google/uuid"
@@ -15,22 +14,23 @@ func (pg *Postgres) CreateDomain(ctx context.Context, d types.DomainCreate) (uui
 
 	creator := uuid.UUID{}
 
-	result, err := pg.db.ExecContext(ctx, `
+	var id uuid.UUID
+	err := pg.db.QueryRowContext(ctx, `
 		INSERT INTO domains (
 			display_name,
 			description,
 			notes,
 			creator
 		) VALUES ($1,$2,$3,$4)
-	`, d.DisplayName, d.Description, d.Notes, creator)
+		RETURNING id
+	`, d.DisplayName, d.Description, d.Notes, creator).Scan(&id)
+
 	if err != nil {
 		ctx = ctxerr.SetField(ctx, "body", d)
 		return uuid.UUID{}, ctxerr.Wrap(ctx, err, "c486d504-230e-4fa7-9aea-f267b07fac50")
 	}
-	id, err := result.LastInsertId()
-	log.Println(id)
 
-	return uuid.UUID{}, nil
+	return id, nil
 }
 
 func (pg *Postgres) GetDomain(ctx context.Context, id string) (types.Domain, error) {
@@ -100,7 +100,6 @@ func (pg *Postgres) ListDomains(ctx context.Context, l types.DomainList) ([]type
 			notes
 		FROM domains
 	` + where
-	log.Println(query, args)
 
 	rows, err := pg.db.QueryContext(ctx, query, args...)
 	if err != nil {
