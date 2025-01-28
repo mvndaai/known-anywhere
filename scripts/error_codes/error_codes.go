@@ -6,7 +6,6 @@ import (
 	"log"
 	"os/exec"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
@@ -19,31 +18,31 @@ func main() {
 	}
 }
 
+const (
+	FormatUUID      = "uuid"
+	FormatUppercase = "uppercase"
+)
+
 func errorMain() error {
 	location := flag.String("location", ".", "The location to run grep")
-	format := flag.String("format", "", "The format to search for")
-	fix := flag.String("fix", "", "Auto fix duplicates or invalid if possible")
+	format := flag.String("format", "", fmt.Sprintf("The format to search for (%s)", strings.Join([]string{FormatUUID, FormatUppercase}, "|")))
+	fix := flag.Bool("fix", false, "Auto fix duplicates or invalid if possible")
+	includeComments := flag.Bool("includeComments", false, "Include commented lines")
 	flag.Parse()
 
-	//fmt.Println("Hello, playground")
-	lines, err := runGrep(*location)
+	lines, err := runGrep(*location, *includeComments)
 	if err != nil {
 		return fmt.Errorf("runGrep: %w", err)
 	}
-	//fmt.Println(lines)
 
 	codes := []grepParts{}
 	missings := []grepParts{}
 	for _, line := range lines {
-		gp, err := extractCode(line)
-		if err != nil {
-			return fmt.Errorf("extractCode: %w", err)
-		}
-		if gp.code == "" {
-			missings = append(missings, gp)
+		if line.code == "" {
+			missings = append(missings, line)
 			continue
 		}
-		codes = append(codes, gp)
+		codes = append(codes, line)
 	}
 	if len(missings) > 0 {
 		lines := []string{}
@@ -71,7 +70,7 @@ func errorMain() error {
 		fmt.Printf("Invalid codes: \n%s\n\n", codes)
 	}
 
-	if v, _ := strconv.ParseBool(*fix); v {
+	if *fix {
 		badLines := append(duplicates, invalid...)
 		badLines = append(badLines, missings...)
 		err = fixCodes(*format, badLines)
@@ -83,7 +82,7 @@ func errorMain() error {
 	return nil
 }
 
-func runGrep(location string) ([]string, error) {
+func runGrep(location string, includeComments bool) ([]grepParts, error) {
 	// Run grep command
 	cmd := exec.Command("grep", "-rn", "--include=*.go", "-E", "ctxerr\\.(New|Wrap)", location)
 	output, err := cmd.Output()
@@ -91,7 +90,7 @@ func runGrep(location string) ([]string, error) {
 		return nil, err
 	}
 	lines := strings.Split(string(output), "\n")
-	var filteredLines []string
+	var filteredLines []grepParts
 	for _, line := range lines {
 		if strings.Contains(line, "Binary file") {
 			continue
@@ -102,14 +101,22 @@ func runGrep(location string) ([]string, error) {
 		}
 
 		// Filter out comments
-		split := strings.SplitN(line, ":", 3)
-		if len(split) == 3 {
-			if strings.HasPrefix(strings.TrimSpace(split[2]), "//") {
-				continue
+		if !includeComments {
+			split := strings.SplitN(line, ":", 3)
+			if len(split) == 3 {
+				if strings.HasPrefix(strings.TrimSpace(split[2]), "//") {
+					continue
+				}
 			}
 		}
 
-		filteredLines = append(filteredLines, line)
+		gp, err := extractCode(line)
+		if err != nil {
+			log.Println(fmt.Errorf("runGrep extractCode: %w", err))
+			continue
+		}
+
+		filteredLines = append(filteredLines, gp)
 	}
 	return filteredLines, nil
 }
@@ -138,23 +145,17 @@ func extractCode(line string) (grepParts, error) {
 	switch {
 	case reWrap.MatchString(line):
 		matches := reWrap.FindStringSubmatch(line)
-		//fmt.Println("wrap", matches)
 		if len(matches) > 2 {
 			r.code = matches[2]
 		}
 	case reNew.MatchString(line):
 		matches := reNew.FindStringSubmatch(line)
-		//fmt.Println("new", matches)
 		if len(matches) > 2 {
 			r.code = matches[2]
 		}
 	default:
 		return r, fmt.Errorf("No match found: %s", line)
 	}
-
-	//log.Println(line)
-	//log.Printf("%#v\n", r)
-	//panic("hello")
 
 	return r, nil
 }
@@ -177,12 +178,12 @@ func getDuplicates(gps []grepParts) []grepParts {
 func invalidCodes(gps []grepParts, format string) []grepParts {
 	var f func(code string) bool
 	switch format {
-	case "uuid":
+	case FormatUUID:
 		f = func(code string) bool {
 			_, err := uuid.Parse(code)
 			return err != nil
 		}
-	case "uppercase":
+	case FormatUppercase:
 		f = func(code string) bool {
 			return code != strings.ToUpper(code)
 		}
@@ -201,12 +202,29 @@ func invalidCodes(gps []grepParts, format string) []grepParts {
 }
 
 func fixCodes(format string, gps []grepParts) error {
-	if format != "uuid" {
+	var f func(code string) string
+	switch format {
+	case FormatUUID:
+		f = func(code string) string {
+			return uuid.New().String()
+		}
+	case FormatUppercase:
+		f = func(code string) string {
+			return strings.ToUpper(code)
+		}
+	}
+
+	if f == nil {
 		return nil
 	}
 
+	var changeCount int
+	log.Println("Making changes")
 	for _, gp := range gps {
-		newCode := uuid.New().String()
+		newCode := f(gp.code)
+		if newCode == "" {
+			continue
+		}
 		var newContent string
 		switch {
 		case reWrap.MatchString(gp.content):
@@ -216,8 +234,6 @@ func fixCodes(format string, gps []grepParts) error {
 		default:
 			return fmt.Errorf("could not replace in line %+v", gp)
 		}
-		log.Println("newContent", newContent)
-		fmt.Println()
 
 		// Replace the entire line with the updated value in the variable `newContent`
 		cmd := exec.Command("sed", "-i", "", fmt.Sprintf("%ss/.*/%s/", gp.line, newContent), gp.filePath)
@@ -227,7 +243,9 @@ func fixCodes(format string, gps []grepParts) error {
 		if err != nil {
 			return fmt.Errorf("failed to replace line in file %s at line %s: %w, stderr: %s", gp.filePath, gp.line, err, stderr.String())
 		}
+		changeCount++
 		fmt.Printf("Updated code '%s' in file %s at line %s with code %s\n", gp.code, gp.filePath, gp.line, newCode)
 	}
+	fmt.Println("Total changes:", changeCount)
 	return nil
 }
