@@ -65,7 +65,7 @@ func testCreateJWTHandler(r *http.Request) (data, meta any, status int, _ error)
 
 	token, err := jwt.GenerateJWT(ctx, claims)
 	if err != nil {
-		return nil, nil, http.StatusBadGateway, ctxerr.Wrap(ctx, err, "ea32c534-2c39-4a92-9714-0863073a79c6")
+		return nil, nil, http.StatusBadGateway, ctxerr.Wrap(ctx, err, "8219cb01-e2cb-41d9-8d0a-6512faa04441")
 	}
 	return token, nil, http.StatusOK, nil
 }

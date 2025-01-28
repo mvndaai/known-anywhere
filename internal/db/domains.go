@@ -95,7 +95,7 @@ func (pg *Postgres) ListDomains(ctx context.Context, l types.DomainList) ([]type
 		FROM domains
 	`+where, args...)
 	if err != nil {
-		return nil, pr, ctxerr.Wrap(ctx, err, "f5a3c9c5-7f9d-4a3f-9d4c-4c9d3b6c0c8d")
+		return nil, pr, ctxerr.Wrap(ctx, err, "4f0f387a-3c09-4170-87f8-ed6976e3cfcd")
 	}
 	defer rows.Close()
 
