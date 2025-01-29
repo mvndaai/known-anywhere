@@ -85,37 +85,71 @@ type (
 	}
 )
 
-func (dc DomainCreate) Validate(ctx context.Context) error {
+type (
+	UserCreate struct {
+		Username    string `json:"username"`
+		DisplayName string `json:"display_name"`
+	}
+
+	User struct {
+		ID uuid.UUID `json:"id"`
+		UserCreate
+	}
+
+	UserList struct {
+		Pagination Pagination `json:"pagination"`
+		Filters    UserCreate `json:"filters"`
+	}
+)
+
+func (v DomainCreate) Validate(ctx context.Context) error {
 	var err error
-	if dc.DisplayName == "" {
+	if v.DisplayName == "" {
 		err = errors.Join(err, ctxerr.NewHTTP(ctx, "56f79cb4-b081-4447-b0fe-a0317d57f809", "missing display_name", http.StatusBadRequest, "missing display_name"))
 	}
 	return ctxerr.QuickWrap(ctx, err)
 }
 
-func (dl DomainLink) Validate(ctx context.Context) error {
+func (v DomainLink) Validate(ctx context.Context) error {
 	var err error
-	if dl.Link == "" {
+	if v.Link == "" {
 		err = errors.Join(err, ctxerr.NewHTTP(ctx, "c4173215-7a81-467f-ac8b-0dc525074bd0", "missing link", http.StatusBadRequest, "missing link"))
 	}
 	return ctxerr.QuickWrap(ctx, err)
 }
 
-func (dl *DomainList) Normalize() {
-	dl.Filters.DisplayName = strings.TrimSpace(dl.Filters.DisplayName)
-	dl.Filters.Description = strings.TrimSpace(dl.Filters.Description)
-	dl.Filters.Notes = strings.TrimSpace(dl.Filters.Notes)
-	dl.Pagination.Normalize()
+func (v *DomainList) Normalize() {
+	v.Filters.DisplayName = strings.TrimSpace(v.Filters.DisplayName)
+	v.Filters.Description = strings.TrimSpace(v.Filters.Description)
+	v.Filters.Notes = strings.TrimSpace(v.Filters.Notes)
+	v.Pagination.Normalize()
 }
 
-func (dl *DomainList) Fill(ctx context.Context, q url.Values) error {
-	dl.Filters.DisplayName = q.Get(JSONTag(dl.Filters, "DisplayName"))
-	dl.Filters.Description = q.Get(JSONTag(dl.Filters, "Description"))
-	dl.Filters.Notes = q.Get(JSONTag(dl.Filters, "Notes"))
-	err := dl.Pagination.Fill(ctx, q)
+func (v *DomainList) Fill(ctx context.Context, q url.Values) error {
+	v.Filters.DisplayName = q.Get(JSONTag(v.Filters, "DisplayName"))
+	v.Filters.Description = q.Get(JSONTag(v.Filters, "Description"))
+	v.Filters.Notes = q.Get(JSONTag(v.Filters, "Notes"))
+	err := v.Pagination.Fill(ctx, q)
 	if err != nil {
 		return ctxerr.QuickWrap(ctx, err)
 	}
-	dl.Normalize()
+	v.Normalize()
+	return nil
+}
+
+func (v *UserList) Normalize() {
+	v.Filters.Username = strings.TrimSpace(v.Filters.Username)
+	v.Filters.DisplayName = strings.TrimSpace(v.Filters.DisplayName)
+	v.Pagination.Normalize()
+}
+
+func (v *UserList) Fill(ctx context.Context, q url.Values) error {
+	v.Filters.Username = q.Get(JSONTag(v.Filters, "Username"))
+	v.Filters.DisplayName = q.Get(JSONTag(v.Filters, "DisplayName"))
+	err := v.Pagination.Fill(ctx, q)
+	if err != nil {
+		return ctxerr.QuickWrap(ctx, err)
+	}
+	v.Normalize()
 	return nil
 }

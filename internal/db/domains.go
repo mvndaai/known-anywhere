@@ -56,28 +56,28 @@ func (pg *Postgres) GetDomain(ctx context.Context, id string) (types.Domain, err
 	return d, nil
 }
 
-func (pg *Postgres) ListDomains(ctx context.Context, l types.DomainList) ([]types.Domain, types.PaginationResponse, error) {
+func (pg *Postgres) ListDomains(ctx context.Context, filters types.DomainCreate, pagination types.Pagination) ([]types.Domain, types.PaginationResponse, error) {
 	pr := types.PaginationResponse{}
 
 	wheres := []string{}
 	args := []any{}
 	vc := varCount{}
-	if l.Filters.DisplayName != "" {
+	if filters.DisplayName != "" {
 		wheres = append(wheres, "display_name = "+vc.Next())
-		args = append(args, l.Filters.DisplayName)
+		args = append(args, filters.DisplayName)
 	}
-	if l.Filters.Description != "" {
+	if filters.Description != "" {
 		wheres = append(wheres, "description = "+vc.Next())
-		args = append(args, l.Filters.Description)
+		args = append(args, filters.Description)
 	}
-	if l.Filters.Notes != "" {
+	if filters.Notes != "" {
 		wheres = append(wheres, "notes = "+vc.Next())
-		args = append(args, l.Filters.Notes)
+		args = append(args, filters.Notes)
 	}
 
-	if l.Pagination.Cursor != "" {
+	if pagination.Cursor != "" {
 		wheres = append(wheres, "id > "+vc.Next())
-		args = append(args, l.Pagination.Cursor)
+		args = append(args, pagination.Cursor)
 	}
 	where := strings.Join(wheres, " AND ")
 	if where != "" {
@@ -90,7 +90,7 @@ func (pg *Postgres) ListDomains(ctx context.Context, l types.DomainList) ([]type
 	}
 
 	where += " ORDER BY id ASC LIMIT " + vc.Next()
-	args = append(args, l.Pagination.Limit)
+	args = append(args, pagination.Limit)
 
 	query := `
 		SELECT
@@ -122,8 +122,73 @@ func (pg *Postgres) ListDomains(ctx context.Context, l types.DomainList) ([]type
 		domains = append(domains, d)
 	}
 
-	if len(domains) == l.Pagination.Limit {
+	if len(domains) == pagination.Limit {
 		pr.Cursor = domains[len(domains)-1].ID.String()
 	}
 	return domains, pr, nil
+}
+
+func (pg *Postgres) ListUsers(ctx context.Context, filters types.UserCreate, pagination types.Pagination) ([]types.User, types.PaginationResponse, error) {
+	pr := types.PaginationResponse{}
+
+	wheres := []string{}
+	args := []any{}
+	vc := varCount{}
+	if filters.Username != "" {
+		wheres = append(wheres, "username = "+vc.Next())
+		args = append(args, filters.Username)
+	}
+	if filters.DisplayName != "" {
+		wheres = append(wheres, "display_name = "+vc.Next())
+		args = append(args, filters.DisplayName)
+	}
+	if pagination.Cursor != "" {
+		wheres = append(wheres, "id > "+vc.Next())
+		args = append(args, pagination.Cursor)
+	}
+	where := strings.Join(wheres, " AND ")
+	if where != "" {
+		where = "WHERE " + where
+	}
+
+	err := pg.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM users `+where, args...).Scan(&pr.Total)
+	if err != nil {
+		return nil, pr, ctxerr.Wrap(ctx, err, "03dfe6c1-1bdc-49dc-95fb-68041715007e")
+	}
+
+	where += " ORDER BY id ASC LIMIT " + vc.Next()
+	args = append(args, pagination.Limit)
+
+	query := `
+		SELECT
+			id,
+			username,
+			display_name
+		FROM users
+	` + where
+
+	rows, err := pg.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, pr, ctxerr.Wrap(ctx, err, "bf312ca1-8ce4-4b59-8cb3-c58c5ca9db49")
+	}
+	defer rows.Close()
+
+	var users []types.User
+	for rows.Next() {
+		var d types.User
+		err = rows.Scan(
+			&d.ID,
+			NullableScan(func(v string) { d.Username = v }),
+			NullableScan(func(v string) { d.DisplayName = v }),
+		)
+		if err != nil {
+			return nil, pr, ctxerr.Wrap(ctx, err, "8726f7bb-0df4-4d1d-8571-3bf7c7af4b8a")
+		}
+		users = append(users, d)
+	}
+
+	if len(users) == pagination.Limit {
+		pr.Cursor = users[len(users)-1].ID.String()
+	}
+	return users, pr, nil
 }

@@ -36,6 +36,7 @@ func StartServer() error {
 		// TODO
 		// Most get/list routes are unprotected
 		NewRoute(http.MethodGet, "/api/domain", h.domainListHandler)
+		NewRoute(http.MethodGet, "/api/user", h.userListHandler)
 		//NewRoute(http.MethodGet, "/api/domain/{id}", h.domainGetHandler)
 
 		NewRoute(http.MethodPost, "/api/protected/domain", h.domainCreateHandler, JWTMiddleware)
@@ -92,9 +93,20 @@ func (h *Handler) domainListHandler(r *http.Request) (data, meta any, status int
 	ctx := r.Context()
 	list := types.DomainList{}
 	err := list.Fill(ctx, r.URL.Query())
-	domains, pagination, err := h.db.ListDomains(ctx, list)
+	domains, pagination, err := h.db.ListDomains(ctx, list.Filters, list.Pagination)
 	if err != nil {
 		return nil, nil, http.StatusBadRequest, ctxerr.QuickWrap(ctx, err)
 	}
 	return domains, pagination, http.StatusOK, nil
+}
+
+func (h *Handler) userListHandler(r *http.Request) (data, meta any, status int, _ error) {
+	ctx := r.Context()
+	list := types.UserList{}
+	err := list.Fill(ctx, r.URL.Query())
+	users, pagination, err := h.db.ListUsers(ctx, list.Filters, list.Pagination)
+	if err != nil {
+		return nil, nil, http.StatusBadRequest, ctxerr.QuickWrap(ctx, err)
+	}
+	return users, pagination, http.StatusOK, nil
 }
