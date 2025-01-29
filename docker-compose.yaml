@@ -1,14 +1,31 @@
-version: '3.9'
+version: '3.8'
 
 services:
-  postgres:
-      image: postgres:15.3-alpine3.18
-      restart: always
-      environment:
-        - POSTGRES_USER=postgres
-        - POSTGRES_PASSWORD=postgres
-        - POSTGRES_DB=db
-      ports:
-        - '5432:5432'
-      volumes:
-        - ./docker/volumes/db:/var/lib/postgresql/data
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  go-builder:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    volumes:
+    # TODO find out why this isn't working
+      - ./bin:/app/bin 
+
+  frontend-builder:
+    build:
+      context: ./frontend/app
+      dockerfile: ../../docker/Dockerfile.frontend
+    volumes:
+      - ./frontend/app/build:/app/build
+
+volumes:
+  postgres_data:

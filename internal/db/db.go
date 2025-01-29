@@ -27,6 +27,7 @@ func (pg *Postgres) Connect(ctx context.Context) error {
 	if sslmode == "" {
 		sslmode = "disable"
 	}
+	// TODO add POSTGRES_HOST and POSTGRES_PORT
 
 	dbSorceName := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s", un, pw, dbname, sslmode)
 	var err error
