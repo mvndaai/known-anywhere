@@ -81,7 +81,8 @@ func (pg *Postgres) CreateTables(ctx context.Context) error {
 			deleted BOOLEAN default false,
 			creator uuid NOT NULL references users(id),
 			created TIMESTAMP default CURRENT_TIMESTAMP,
-			modified TIMESTAMP default CURRENT_TIMESTAMP
+			modified TIMESTAMP default CURRENT_TIMESTAMP,
+			pending BOOLEAN default true
 		)`,
 		"domain_links": `(
 			domain_id uuid NOT NULL references domains(id),
@@ -92,6 +93,7 @@ func (pg *Postgres) CreateTables(ctx context.Context) error {
 			creator uuid NOT NULL references users(id),
 			created TIMESTAMP default CURRENT_TIMESTAMP,
 			modified TIMESTAMP default CURRENT_TIMESTAMP,
+			pending BOOLEAN default true,
 			PRIMARY KEY (domain_id, link)
 		);
 		COMMENT ON COLUMN domain_links.link IS 'this is an app or url';`,

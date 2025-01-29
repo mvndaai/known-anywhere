@@ -25,7 +25,13 @@ type (
 
 type WraperFunc (func(r *http.Request) (data, meta any, status int, _ error))
 
+var defaultMiddleware = []func(http.Handler) http.Handler{
+	CleanUpParamsMiddleware,
+}
+
 func NewRoute(method, path string, wf WraperFunc, middleware ...func(http.Handler) http.Handler) {
+	middleware = append(defaultMiddleware, middleware...)
+
 	if _, ok := routes[method]; !ok {
 		routes[method] = make([]string, 0)
 	}

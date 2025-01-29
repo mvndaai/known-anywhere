@@ -122,6 +122,8 @@ func (pg *Postgres) ListDomains(ctx context.Context, l types.DomainList) ([]type
 		domains = append(domains, d)
 	}
 
-	pr.Cursor = domains[len(domains)-1].ID.String()
+	if len(domains) == l.Pagination.Limit {
+		pr.Cursor = domains[len(domains)-1].ID.String()
+	}
 	return domains, pr, nil
 }

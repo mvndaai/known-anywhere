@@ -3,8 +3,10 @@ package router
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/mvndaai/ctxerr"
 	ctxerrhttp "github.com/mvndaai/ctxerr/http"
@@ -36,5 +38,21 @@ func JWTMiddleware(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+func CleanUpParamsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Clean up the URL parameters
+		nq := url.Values{}
+		for k, vs := range r.URL.Query() {
+			var nvs []string
+			for _, v := range vs {
+				nvs = append(nvs, strings.TrimSpace(v))
+			}
+			nq[strings.TrimSpace(strings.ToLower(k))] = nvs
+		}
+		r.URL.RawQuery = nq.Encode()
+		next.ServeHTTP(w, r.WithContext(r.Context()))
 	})
 }

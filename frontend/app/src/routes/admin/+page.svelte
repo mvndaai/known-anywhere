@@ -10,6 +10,7 @@
 
     // List domain
     let domains = $state([]);
+    let domainListQueryParams = $state('');
 
 </script>
 
@@ -46,7 +47,7 @@
     <span>
         <h3>List</h3>
         <button onclick={async () => {
-            const response = await fetch(`${backend}/api/domain`, {
+            const response = await fetch(`${backend}/api/domain${domainListQueryParams}`, {
                 headers: {'Content-Type': 'application/json'},
             });
             const j = await response.json();
@@ -54,6 +55,7 @@
             domains = j.data;
 
         }}>List</button>
+        <input bind:value={domainListQueryParams} type="text" placeholder="Query Params"/>
         <table>
             <thead>
                 <tr>
