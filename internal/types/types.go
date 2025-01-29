@@ -153,3 +153,6 @@ func (v *UserList) Fill(ctx context.Context, q url.Values) error {
 	v.Normalize()
 	return nil
 }
+
+func (d Domain) GetID() uuid.UUID { return d.ID }
+func (u User) GetID() uuid.UUID   { return u.ID }
