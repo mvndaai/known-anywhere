@@ -56,3 +56,14 @@ func CleanUpParamsMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(r.Context()))
 	})
 }
+
+func JWTSubjectMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		claims, err := jwt.GetJWTClaims(r)
+		if err == nil && claims != nil {
+			ctx := jwt.ContextWithSubject(r.Context(), claims.Subject)
+			r = r.WithContext(ctx)
+		}
+		next.ServeHTTP(w, r)
+	})
+}

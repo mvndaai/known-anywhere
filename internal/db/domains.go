@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/google/uuid"
+	"github.com/mvndaai/known-socially/internal/jwt"
 	"github.com/mvndaai/known-socially/internal/types"
 )
 
@@ -26,8 +27,7 @@ func scanDomain(scanner interface {
 }
 
 func (pg *Postgres) CreateDomain(ctx context.Context, d types.DomainCreate) (uuid.UUID, error) {
-	// TODO pass through the JWT user
-	creator := uuid.UUID{}
+	creator := jwt.SubjectFromContext(ctx)
 	return insertAndReturnID(ctx, pg.db, tableDomains, d, columnValue{name: "creator", value: creator})
 }
 
