@@ -40,6 +40,7 @@ func StartServer() error {
 		//NewRoute(http.MethodGet, "/api/domain/{id}", h.domainGetHandler)
 
 		NewRoute(http.MethodPost, "/api/protected/domain", h.domainCreateHandler, JWTMiddleware)
+		NewRoute(http.MethodPost, "/api/protected/user", h.userCreateHandler, JWTMiddleware)
 	}
 
 	port := GetPort()
@@ -82,6 +83,23 @@ func (h *Handler) domainCreateHandler(r *http.Request) (data, meta any, status i
 	}
 
 	d, err := h.db.CreateDomain(ctx, body)
+	if err != nil {
+		return nil, nil, http.StatusBadRequest, ctxerr.QuickWrap(ctx, err)
+	}
+
+	return d, nil, http.StatusOK, nil
+}
+
+func (h *Handler) userCreateHandler(r *http.Request) (data, meta any, status int, _ error) {
+	ctx := r.Context()
+	body := types.UserCreate{}
+	err := validjson.UnmarshalReadCloser(ctx, r.Body, &body)
+	defer r.Body.Close()
+	if err != nil {
+		return nil, nil, http.StatusBadRequest, ctxerr.Wrap(ctx, err, "36243519-91ef-470f-81e5-13173d29be87")
+	}
+
+	d, err := h.db.CreateUser(ctx, body)
 	if err != nil {
 		return nil, nil, http.StatusBadRequest, ctxerr.QuickWrap(ctx, err)
 	}

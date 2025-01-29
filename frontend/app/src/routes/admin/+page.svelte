@@ -95,7 +95,7 @@
         <input bind:value={userUsername} type="text" placeholder="Username"/>
         <input bind:value={userDisplayName} type="text" placeholder="Display Name"/>
         <button onclick={async () => {
-            const response = await fetch(`${backend}/api/protected/domain`, {
+            const response = await fetch(`${backend}/api/protected/user`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
