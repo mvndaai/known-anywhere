@@ -45,8 +45,8 @@ func (pg *Postgres) CreateTables(ctx context.Context) error {
 	tables := map[string]string{
 		"users": `(
 			id uuid DEFAULT uuidv7() PRIMARY KEY,
-			username VARCHAR NOT NULL UNIQUE,
-			display_name VARCHAR,
+			username TEXT NOT NULL UNIQUE,
+			display_name TEXT,
 
 			deleted BOOLEAN default false,
 			created TIMESTAMP default CURRENT_TIMESTAMP,
@@ -54,7 +54,7 @@ func (pg *Postgres) CreateTables(ctx context.Context) error {
 		)`,
 		"delete_audit": `(
 			id uuid DEFAULT uuidv7() PRIMARY KEY,
-			table_name VARCHAR NOT NULL,
+			table_name TEXT NOT NULL,
 			row_id uuid NOT NULL,
 
 			creator uuid NOT NULL references users(id),
@@ -65,7 +65,7 @@ func (pg *Postgres) CreateTables(ctx context.Context) error {
 		)`,
 		"groups": `(
 			id uuid DEFAULT uuidv7() PRIMARY KEY,
-			display_name VARCHAR,
+			description TEXT,
 
 			deleted BOOLEAN default false,
 			creator uuid NOT NULL references users(id),
@@ -86,7 +86,7 @@ func (pg *Postgres) CreateTables(ctx context.Context) error {
 		)`,
 		"domain_links": `(
 			domain_id uuid NOT NULL references domains(id),
-			link VARCHAR NOT NULL,
+			link TEXT NOT NULL,
 			country_code TEXT,
 
 			deleted BOOLEAN default false,
@@ -100,8 +100,8 @@ func (pg *Postgres) CreateTables(ctx context.Context) error {
 		"socials": `(
 			id uuid DEFAULT uuidv7() PRIMARY KEY,
 			domain_id uuid NOT NULL references domains(id),
-			username VARCHAR,
-			user_id VARCHAR,
+			username TEXT,
+			user_id TEXT,
 			group_id uuid NOT NULL references groups(id),
 
 			deleted BOOLEAN default false,

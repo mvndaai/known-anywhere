@@ -36,10 +36,10 @@ func (pg *Postgres) Connect(ctx context.Context) error {
 		return ctxerr.Wrap(ctx, err, "e94bf5b7-5449-41a6-ae92-2103fa475845", "Failed to connect to the database")
 	}
 
-	//err = pg.CreateTables(ctx)
-	//if err != nil {
-	//	return ctxerr.QuickWrap(ctx, err)
-	//}
+	err = pg.CreateTables(ctx)
+	if err != nil {
+		return ctxerr.QuickWrap(ctx, err)
+	}
 
 	return nil
 }
