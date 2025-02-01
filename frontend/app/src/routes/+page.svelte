@@ -1,6 +1,7 @@
 <script>
     // import { json } from "@sveltejs/kit";
     import { onMount } from "svelte";
+    import Header from "../lib/header.svelte";
 
     const backend = 'http://localhost:8080'
 
@@ -39,6 +40,7 @@
 </script>
 
 
+<Header />
 <h1>Known Socially</h1>
 
 

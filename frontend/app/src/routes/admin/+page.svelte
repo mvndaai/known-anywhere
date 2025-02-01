@@ -1,5 +1,6 @@
-
 <script>
+    import Header from "../../lib/header.svelte";
+
     const backend = 'http://localhost:8080'
     const ls = (typeof window !== 'undefined') ? window.localStorage : null;
 
@@ -21,6 +22,7 @@
 
 
 </script>
+<Header />
 
 <h1>Testing page</h1>
 
