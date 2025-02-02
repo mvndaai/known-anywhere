@@ -28,7 +28,7 @@
             body:  JSON.stringify({
                 'sub': subject,
                 'username': username,
-                'exp': Math.floor(new Date().setDate(new Date().getDate() + days) / 1000),
+                'exp': Math.floor(new Date().setDate(new Date().getDate() + Number(days)) / 1000),
             }),
         });
         const j = await response.json();
