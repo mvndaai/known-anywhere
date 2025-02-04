@@ -35,7 +35,7 @@ func StartServer() error {
 			Version:     "0.0.1",
 		})
 	if err != nil {
-		return ctxerr.QuickWrap(context.Background(), err)
+		return ctxerr.Wrap(context.Background(), err, "120acdfb-98eb-4a65-a298-6619b8b7c942")
 	}
 
 	// Load the svelte static frontend files
