@@ -2,49 +2,16 @@ package router
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/mvndaai/ctxerr"
-	ctxerrhttp "github.com/mvndaai/ctxerr/http"
 	"github.com/mvndaai/known-socially/internal/jwt"
 	"github.com/mvndaai/known-socially/internal/router/server"
 	"github.com/mvndaai/known-socially/internal/types"
 	"github.com/mvndaai/validjson"
 )
-
-type GenericHandlerFunc func(r *http.Request) (data, meta any, status int, _ error)
-
-func GenericToHTTP(handler GenericHandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var ret Return
-		data, meta, status, err := handler(r)
-		if err != nil {
-			ctxerr.Handle(err)
-			debugErrors, _ := strconv.ParseBool(os.Getenv("DEBUG_ERRORS"))
-			var errorResp ctxerrhttp.ErrorResponse
-			status, errorResp = ctxerrhttp.StatusCodeAndResponse(err, debugErrors, debugErrors)
-			ret.Error = &errorResp.Error
-		} else {
-			ret.Success = true
-			ret.Data = data
-			ret.Meta = meta
-		}
-
-		err = json.NewEncoder(w).Encode(ret)
-		if err != nil {
-			ctxerr.Handle(ctxerr.Wrap(r.Context(), err, "8e9ba72c-7279-42bd-b01d-7d453b7915a3", "writing response"))
-		}
-
-		// TODO figure out why this is always 200
-		if status != 0 && status != http.StatusOK {
-			w.WriteHeader(status)
-		}
-	}
-}
 
 func StartServer() error {
 	h, err := NewHandler()
@@ -56,7 +23,6 @@ func StartServer() error {
 	rootRouter, err := server.New(
 		server.Config[GenericHandlerFunc]{
 			PathPrefix: "/",
-			//		PathPrefix            string
 			//GenericMiddleware     []func(T) T
 			//Middleware            []MiddlewareFunc
 			//DefaultParameters     openapi3.Parameters
@@ -77,9 +43,6 @@ func StartServer() error {
 	rootRouter.Handle("", http.FileServer(http.Dir("./frontend/static")))
 
 	rootRouter.Endpoint("/status", http.MethodGet, statusHandler, nil)
-
-	//NewRoute(http.MethodGet, "/status", statusHandler)
-	//NewRoute(http.MethodGet, "/api", ListRoutesHandler)
 
 	env := os.Getenv("ENVIRONMENT")
 	if env == "dev" {
