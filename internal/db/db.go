@@ -109,6 +109,33 @@ func getSelectFields[T any]() string {
 	return strings.Join(fields, ", ")
 }
 
+type whereClause struct {
+	varCount int
+	wheres   []string
+	args     []any
+}
+
+func (wc *whereClause) Add(where string, arg any) {
+	if arg == nil {
+		wc.wheres = append(wc.wheres, where)
+		return
+	}
+	wc.wheres = append(wc.wheres, where+wc.nextVar())
+	wc.args = append(wc.args, arg)
+}
+
+func (wc *whereClause) WhereAndArgs() (string, []any) {
+	if len(wc.wheres) == 0 {
+		return "", nil
+	}
+	return "WHERE " + strings.Join(wc.wheres, " AND "), wc.args
+}
+
+func (wc *whereClause) nextVar() string {
+	wc.varCount++
+	return fmt.Sprintf("$%d", wc.varCount)
+}
+
 func listItems[T any, F any](
 	ctx context.Context,
 	db *sql.DB,
@@ -118,13 +145,11 @@ func listItems[T any, F any](
 	scan func(*sql.Rows) (T, error),
 ) ([]T, types.PaginationResponse, error) {
 	pr := types.PaginationResponse{}
-	vc := varCount{}
+	wc := whereClause{}
 
 	selectFields := getSelectFields[T]()
 
 	// Build where clause using reflection
-	wheres := []string{}
-	args := []any{}
 	v := reflect.ValueOf(filters)
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {
@@ -141,31 +166,25 @@ func listItems[T any, F any](
 			continue
 		}
 
-		wheres = append(wheres, columnName+" = "+vc.Next())
-		args = append(args, value.Interface())
+		wc.Add(tableName+"."+columnName+" = ", value.Interface())
 	}
 
-	if pagination.Cursor != "" {
-		wheres = append(wheres, "id > "+vc.Next())
-		args = append(args, pagination.Cursor)
-	}
-	where := strings.Join(wheres, " AND ")
-	if where != "" {
-		where = "WHERE " + where
-	}
-
+	where, args := wc.WhereAndArgs()
 	err := db.QueryRowContext(ctx, "SELECT COUNT(*) FROM "+tableName+" "+where, args...).Scan(&pr.Total)
 	if err != nil {
 		return nil, pr, ctxerr.Wrap(ctx, err, "c5c072fe-8e87-47be-9e15-ec390dfc8d35")
 	}
 
-	where += " ORDER BY id ASC LIMIT " + vc.Next()
+	if pagination.Cursor != "" {
+		wc.Add("id > ", pagination.Cursor)
+		where, args = wc.WhereAndArgs()
+	}
+	where += " ORDER BY id ASC LIMIT " + wc.nextVar()
 	args = append(args, pagination.Limit)
-
 	query := fmt.Sprintf(`SELECT %s FROM %s %s`, selectFields, tableName, where)
 	rows, err := db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, pr, ctxerr.Wrap(ctx, err, "4f0f387a-3c09-4170-87f8-ed6976e3cfcd")
+		return nil, pr, ctxerr.Wrap(ctx, err, "1d3f4034-4dd1-4772-9db0-d56365f67f11")
 	}
 	defer rows.Close()
 
@@ -177,7 +196,9 @@ func listItems[T any, F any](
 		}
 		items = append(items, item)
 	}
-
+	if items == nil { // Don't return null, return an empty slice
+		items = []T{}
+	}
 	if len(items) == pagination.Limit {
 		if last, ok := any(items[len(items)-1]).(interface{ GetID() uuid.UUID }); ok {
 			pr.Cursor = last.GetID().String()

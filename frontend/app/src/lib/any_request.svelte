@@ -9,7 +9,6 @@
 
 <div class='any_request'>
     <div class='any_request__inputs'>
-        <!--<input bind:value={method} type='text' placeholder='Method'>-->
         <select bind:value={method}>
             <option value='GET'>GET</option>
             <option value='POST'>POST</option>
