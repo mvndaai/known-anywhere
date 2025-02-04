@@ -13,8 +13,8 @@ import (
 	"github.com/mvndaai/known-socially/internal/jwt"
 )
 
-func JWTMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func JWTMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
 		err := func() error {
@@ -38,11 +38,11 @@ func JWTMiddleware(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(w, r)
-	})
+	}
 }
 
-func CleanUpParamsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func CleanUpParamsMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		// Clean up the URL parameters
 		nq := url.Values{}
 		for k, vs := range r.URL.Query() {
@@ -54,16 +54,16 @@ func CleanUpParamsMiddleware(next http.Handler) http.Handler {
 		}
 		r.URL.RawQuery = nq.Encode()
 		next.ServeHTTP(w, r.WithContext(r.Context()))
-	})
+	}
 }
 
-func JWTSubjectMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func JWTSubjectMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		claims, err := jwt.GetJWTClaims(r)
 		if err == nil && claims != nil {
 			ctx := jwt.ContextWithSubject(r.Context(), claims.Subject)
 			r = r.WithContext(ctx)
 		}
 		next.ServeHTTP(w, r)
-	})
+	}
 }

@@ -2,50 +2,118 @@ package router
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/mvndaai/ctxerr"
+	ctxerrhttp "github.com/mvndaai/ctxerr/http"
 	"github.com/mvndaai/known-socially/internal/jwt"
+	"github.com/mvndaai/known-socially/internal/router/server"
 	"github.com/mvndaai/known-socially/internal/types"
 	"github.com/mvndaai/validjson"
 )
 
-func StartServer() error {
-	// Load html files
-	// https://codeandlife.com/2022/02/12/combine-golang-and-sveltekit-for-gui/
-	http.Handle("/", http.FileServer(http.Dir("./frontend/static")))
+type GenericHandlerFunc func(r *http.Request) (data, meta any, status int, _ error)
 
+func GenericToHTTP(handler GenericHandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var ret Return
+		data, meta, status, err := handler(r)
+		if err != nil {
+			ctxerr.Handle(err)
+			debugErrors, _ := strconv.ParseBool(os.Getenv("DEBUG_ERRORS"))
+			var errorResp ctxerrhttp.ErrorResponse
+			status, errorResp = ctxerrhttp.StatusCodeAndResponse(err, debugErrors, debugErrors)
+			ret.Error = &errorResp.Error
+		} else {
+			ret.Success = true
+			ret.Data = data
+			ret.Meta = meta
+		}
+
+		err = json.NewEncoder(w).Encode(ret)
+		if err != nil {
+			ctxerr.Handle(ctxerr.Wrap(r.Context(), err, "8e9ba72c-7279-42bd-b01d-7d453b7915a3", "writing response"))
+		}
+
+		// TODO figure out why this is always 200
+		if status != 0 && status != http.StatusOK {
+			w.WriteHeader(status)
+		}
+	}
+}
+
+func StartServer() error {
 	h, err := NewHandler()
 	if err != nil {
 		return ctxerr.QuickWrap(context.Background(), err)
 	}
 	defer h.Close()
 
-	NewRoute(http.MethodGet, "/status", statusHandler)
-	NewRoute(http.MethodGet, "/api", ListRoutesHandler)
+	rootRouter, err := server.New(
+		server.Config[GenericHandlerFunc]{
+			PathPrefix: "/",
+			//		PathPrefix            string
+			//GenericMiddleware     []func(T) T
+			//Middleware            []MiddlewareFunc
+			//DefaultParameters     openapi3.Parameters
+			//AllowedOptionsHeaders []string
+			GenericToHTTP: GenericToHTTP, // func(T) http.HandlerFunc
+		},
+		server.DocConfig{
+			ServiceName: "known-socially",
+			Description: "Link social media accounts",
+			Version:     "0.0.1",
+		})
+	if err != nil {
+		return ctxerr.QuickWrap(context.Background(), err)
+	}
+
+	// Load the svelte static frontend files
+	// https://codeandlife.com/2022/02/12/combine-golang-and-sveltekit-for-gui/
+	rootRouter.Handle("", http.FileServer(http.Dir("./frontend/static")))
+
+	rootRouter.Endpoint("/status", http.MethodGet, statusHandler, nil)
+
+	//NewRoute(http.MethodGet, "/status", statusHandler)
+	//NewRoute(http.MethodGet, "/api", ListRoutesHandler)
 
 	env := os.Getenv("ENVIRONMENT")
 	if env == "dev" {
-		// TODO make a better mux
-		NewRoute(http.MethodGet, "/test/error", testErrorHandler)
-		NewRoute(http.MethodPost, "/test/jwt", testCreateJWTHandler)
-		NewRoute(http.MethodGet, "/test/auth", statusHandler, JWTMiddleware)
+		testRouter := rootRouter.Subrouter(server.Config[GenericHandlerFunc]{
+			PathPrefix: "/test",
+		})
+		testRouter.Endpoint("/error", http.MethodGet, testErrorHandler, nil)
+		testRouter.Endpoint("/error", http.MethodPost, testErrorHandler, nil)
+		testRouter.Endpoint("/jwt", http.MethodPost, testCreateJWTHandler, nil)
 
-		// TODO
-		// Most get/list routes are unprotected
-		NewRoute(http.MethodGet, "/api/domain", h.domainListHandler)
-		NewRoute(http.MethodGet, "/api/user", h.userListHandler)
-		//NewRoute(http.MethodGet, "/api/domain/{id}", h.domainGetHandler)
+		rootRouter.Subrouter(server.Config[GenericHandlerFunc]{
+			PathPrefix: "/test/auth",
+			Middleware: []server.MiddlewareFunc{JWTMiddleware},
+		}).Endpoint("", http.MethodGet, statusHandler, nil)
 
-		NewRoute(http.MethodPost, "/api/protected/domain", h.domainCreateHandler, JWTMiddleware)
-		NewRoute(http.MethodPost, "/api/protected/user", h.userCreateHandler, JWTMiddleware)
+		apiRouter := rootRouter.Subrouter(server.Config[GenericHandlerFunc]{
+			PathPrefix: "/api",
+		})
+		apiRouter.Endpoint("/domain", http.MethodGet, h.domainListHandler, nil)
+		//apiRouter.Endpoint("/domain/{id}", http.MethodGet, h.domainGetHandler, nil)
+		apiRouter.Endpoint("/user", http.MethodGet, h.userListHandler, nil)
+
+		protectedapiRouter := apiRouter.Subrouter(server.Config[GenericHandlerFunc]{
+			PathPrefix: "/protected",
+			Middleware: []server.MiddlewareFunc{JWTMiddleware},
+		})
+		protectedapiRouter.Endpoint("/domain", http.MethodPost, h.domainCreateHandler, nil)
+		protectedapiRouter.Endpoint("/user", http.MethodPost, h.userCreateHandler, nil)
 	}
 
 	port := GetPort()
+	s := rootRouter.NewServer(port, nil)
 	log.Println("Starting server at http://localhost" + port)
-	log.Fatal(http.ListenAndServe(port, nil))
+	log.Fatal(s.ListenAndServe())
 	return nil
 }
 

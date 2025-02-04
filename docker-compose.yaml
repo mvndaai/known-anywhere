@@ -17,8 +17,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.backend
     volumes:
-    # TODO find out why this isn't working
-      - ./bin:/app/bin 
+      - ./bin:/app/bin:rw 
 
   frontend-builder:
     build:
