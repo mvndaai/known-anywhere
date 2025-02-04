@@ -46,7 +46,12 @@ func GenericToHTTP(handler GenericHandlerFunc) http.HandlerFunc {
 			ret.Meta = meta
 		}
 
-		err = json.NewEncoder(w).Encode(ret)
+		encoder := json.NewEncoder(w)
+		indent, _ := strconv.ParseBool(r.Header.Get("Indent"))
+		if indent {
+			encoder.SetIndent("", "\t")
+		}
+		err = encoder.Encode(ret)
 		if err != nil {
 			ctxerr.Handle(ctxerr.Wrap(r.Context(), err, "8e9ba72c-7279-42bd-b01d-7d453b7915a3", "writing response"))
 		}

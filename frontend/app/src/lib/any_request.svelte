@@ -21,14 +21,18 @@
         <input bind:value={headers} type='text' placeholder='Headers'>
         <input bind:value={body} type='text' placeholder='Body'>
         <button onclick={async () => {
-            const r = await fetch(url, {
-                method: method,
-                headers: JSON.parse(headers),
-                body: body,
-            });
+            const requestInfo = {method: method};
+            if (headers && headers.length > 0) {
+                requestInfo.headers = JSON.parse(headers);
+            }
+            if (body && body.length > 0) {
+                requestInfo.body = JSON.stringify(body);
+            }
+            const r = await fetch(url, requestInfo);
+            //console.log(r);
             const j = await r.json();
-            console.log(j);
-            response = JSON.stringify(j);
+            //console.log(j);
+            response = JSON.stringify(j, null, '\t');
         }}>Send</button>
     </div>
     <div class='any_request__response'>
