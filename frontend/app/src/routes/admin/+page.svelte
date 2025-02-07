@@ -18,16 +18,11 @@
     let userDisplayName = $state('');
     let users = $state([]);
     let userListQueryParams = $state('');
-
-
-
 </script>
+
 <Header />
 
 <h1>Testing page</h1>
-
-<a href="../">Home</a>
-<a href="./request">Request</a>
 
 
 <div>
