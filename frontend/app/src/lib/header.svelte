@@ -1,5 +1,5 @@
 <script>
-  import Profile from "./profile.svelte";
+  import Profile from "./header_profile.svelte";
   import Search from "./search.svelte";
 </script>
 

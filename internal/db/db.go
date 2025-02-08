@@ -144,6 +144,7 @@ func listItems[T any, F any](
 	pagination types.Pagination,
 	scan func(*sql.Rows) (T, error),
 ) ([]T, types.PaginationResponse, error) {
+	pagination.Normalize()
 	pr := types.PaginationResponse{}
 	wc := whereClause{}
 
@@ -166,7 +167,7 @@ func listItems[T any, F any](
 			continue
 		}
 
-		wc.Add(tableName+"."+columnName+" = ", value.Interface())
+		wc.Add(fmt.Sprintf("%s.%s = ", tableName, columnName), value.Interface())
 	}
 
 	where, args := wc.WhereAndArgs()
@@ -184,6 +185,7 @@ func listItems[T any, F any](
 	query := fmt.Sprintf(`SELECT %s FROM %s %s`, selectFields, tableName, where)
 	rows, err := db.QueryContext(ctx, query, args...)
 	if err != nil {
+		ctx = ctxerr.SetField(ctx, "query", query)
 		return nil, pr, ctxerr.Wrap(ctx, err, "1d3f4034-4dd1-4772-9db0-d56365f67f11")
 	}
 	defer rows.Close()
@@ -199,7 +201,7 @@ func listItems[T any, F any](
 	if items == nil { // Don't return null, return an empty slice
 		items = []T{}
 	}
-	if len(items) == pagination.Limit {
+	if l := len(items); l > 0 && l == pagination.Limit {
 		if last, ok := any(items[len(items)-1]).(interface{ GetID() uuid.UUID }); ok {
 			pr.Cursor = last.GetID().String()
 		}
@@ -249,16 +251,17 @@ func insertAndReturnID[T any](ctx context.Context, db *sql.DB, tableName string,
 	dollars := getDollarSigns(len(columns))
 
 	var id uuid.UUID
-	err := db.QueryRowContext(ctx, fmt.Sprintf(`
+	query := fmt.Sprintf(`
 		INSERT INTO %s (
 			%s
 		) VALUES (%s)
 		RETURNING id
-	`, tableName, strings.Join(columns, ",\n\t\t\t"), strings.Join(dollars, ",")),
-		args...).Scan(&id)
+	`, tableName, strings.Join(columns, ",\n\t\t\t"), strings.Join(dollars, ","))
 
+	err := db.QueryRowContext(ctx, query, args...).Scan(&id)
 	if err != nil {
 		ctx = ctxerr.SetField(ctx, "body", item)
+		ctx = ctxerr.SetField(ctx, "query", query)
 		return uuid.UUID{}, ctxerr.Wrap(ctx, err, "c486d504-230e-4fa7-9aea-f267b07fac50")
 	}
 

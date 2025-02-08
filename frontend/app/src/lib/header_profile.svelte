@@ -1,6 +1,6 @@
 <script>
   import JwtHelper from "./admin/jwt_helper.svelte";
-
+    const backend = 'http://localhost:8080'
     const ls = (typeof window !== 'undefined') ? window.localStorage : null;
     let loggedIn = $state(false);
     let username = $state('');
@@ -18,7 +18,10 @@
     }
 
     const logout = () => {
-        // TODO make api call sending expiration and tokenID to server
+        fetch(`${backend}/api/protected/logout`, {
+            method: 'POST',
+            headers: {'Authorization': `Bearer ${jwt}`},
+        });
         ls.removeItem('jwt');
         loggedIn = false;
     }

@@ -121,6 +121,15 @@ func (pg *Postgres) CreateTables(ctx context.Context) error {
 			UNIQUE (social_id, user_id)
 		);
 		COMMENT ON COLUMN social_votes.downvote IS 'if false then upvote';`,
+		"logout": `(
+			id uuid DEFAULT uuidv7() PRIMARY KEY,
+			jwt_id uuid NOT NULL,
+			expiration TIMESTAMP NOT NULL,
+
+			user_id uuid NOT NULL references users(id),
+			created TIMESTAMP default CURRENT_TIMESTAMP,
+			modified TIMESTAMP default CURRENT_TIMESTAMP
+		)`,
 	}
 
 	for name, table := range tables {

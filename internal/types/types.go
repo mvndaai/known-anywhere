@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/mvndaai/ctxerr"
@@ -99,6 +100,13 @@ type (
 	UserList struct {
 		Pagination Pagination `json:"pagination"`
 		Filters    UserCreate `json:"filters"`
+	}
+)
+
+type (
+	Logout struct {
+		JWTID      uuid.UUID `json:"jwt_id"`
+		Expiration time.Time `json:"expiration"`
 	}
 )
 

@@ -2,19 +2,19 @@ package router
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/mvndaai/ctxerr"
+	"github.com/mvndaai/known-socially/internal/db"
 	"github.com/mvndaai/known-socially/internal/jwt"
 	"github.com/mvndaai/known-socially/internal/router/server"
 	"github.com/mvndaai/known-socially/internal/types"
 	"github.com/mvndaai/validjson"
 )
 
-func StartServer() error {
+func StartServer(pg *db.Postgres) error {
 	h, err := NewHandler()
 	if err != nil {
 		return ctxerr.QuickWrap(context.Background(), err)
@@ -51,12 +51,14 @@ func StartServer() error {
 	//apiRouter.Endpoint("/domain/{id}", http.MethodGet, h.domainGetHandler, nil)
 	apiRouter.Endpoint("/user", http.MethodGet, h.userListHandler, nil)
 
+	jwtMiddleware := JWTMiddleware(pg)
 	protectedapiRouter := apiRouter.Subrouter(server.Config[GenericHandlerFunc]{
 		PathPrefix: "/protected",
-		Middleware: []server.MiddlewareFunc{JWTMiddleware},
+		Middleware: []server.MiddlewareFunc{jwtMiddleware, JWTSubjectMiddleware},
 	})
 	protectedapiRouter.Endpoint("/domain", http.MethodPost, h.domainCreateHandler, nil)
 	protectedapiRouter.Endpoint("/user", http.MethodPost, h.userCreateHandler, nil)
+	protectedapiRouter.Endpoint("/logout", http.MethodPost, h.logoutHandler, nil)
 
 	env := os.Getenv("ENVIRONMENT")
 	if env == "dev" {
@@ -70,17 +72,16 @@ func StartServer() error {
 			return rootRouter.ListRoutes(), nil, http.StatusOK, nil
 		}, nil)
 
-		rootRouter.Subrouter(server.Config[GenericHandlerFunc]{
+		apiRouter.Subrouter(server.Config[GenericHandlerFunc]{
 			PathPrefix: "/test/auth",
-			Middleware: []server.MiddlewareFunc{JWTMiddleware},
+			Middleware: []server.MiddlewareFunc{jwtMiddleware},
 		}).Endpoint("", http.MethodGet, statusHandler, nil)
 
 	}
 
 	port := GetPort()
-	fmt.Println(rootRouter.ListRoutes())
 	s := rootRouter.NewServer(port, nil)
-	log.Println("Starting server at http://localhost" + port)
+	log.Printf("Starting '%s' server at http://localhost%s\n", env, port)
 	log.Fatal(s.ListenAndServe())
 	return nil
 }
