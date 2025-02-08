@@ -1,22 +1,16 @@
 <script>
+  import Profile from "./profile.svelte";
+  import Search from "./search.svelte";
 </script>
 
 <header>
-    <div>
-        <h1>Known Socially</h1>
-        <br>
-        <div>
-            <a href="/">Home</a>
-            <a href="/admin/request">Requests</a>
-            <a href="/admin">Admin</a>
-        </div>
-    </div>
+    <a href="/"><h1>Known Socially</h1></a>
+    <Search />
+    <Profile />
 </header>
 
-
-
 <style>
-    @import './variables.css';
+    @import './theme.css';
     header {
         background-color: var(--color-dark);
         color: var(--color-white);
@@ -29,14 +23,15 @@
         height: var(--header-height);
         box-sizing: border-box;
         z-index: 1000;
-    }
-    div {
+
         display: flex;
-        justify-content: center;
+        justify-content: space-between;
         align-items: center;
-        flex-direction: row;
-    }
-    h1 {
-        margin: 0;
+        padding: 0 1rem;
+
+        a {
+            color: var(--color-white);
+            text-decoration: none;
+        }
     }
 </style>

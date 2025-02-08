@@ -26,6 +26,7 @@ type Router[T any] interface {
 type RootRouter[T any] interface {
 	Router[T]
 	NewServer(port string, sc *ServerConfig) *http.Server
+	ListRoutes() map[string][]string
 }
 
 type router[T any] struct {
@@ -222,6 +223,16 @@ func (rr *rootrouter[T]) NewServer(port string, sc *ServerConfig) *http.Server {
 		IdleTimeout:  sc.IdleTimeout,
 		Addr:         port,
 	}
+}
+
+func (rr *rootrouter[T]) ListRoutes() map[string][]string {
+	allPaths := rr.routeMux.getAllPaths()
+	ret := make(map[string][]string)
+	for _, path := range allPaths {
+		methods := rr.routeMux.getMethods(path)
+		ret[path] = methods
+	}
+	return ret
 }
 
 func addDocPath(path, method string, s *openapi3.T, op *openapi3.Operation) {

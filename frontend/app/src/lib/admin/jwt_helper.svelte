@@ -9,7 +9,7 @@
     const generateJWT = async () => {
         ls?.setItem('subject', subject);
         ls?.setItem('username', username);
-        const response = await fetch(`${backend}/test/jwt`, {
+        const response = await fetch(`${backend}/api/test/jwt`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body:  JSON.stringify({
@@ -39,7 +39,7 @@
         <button onclick={async () => {
             const jwt = ls?.getItem('jwt');
             console.log(jwt);
-            const response = await fetch(`${backend}/test/auth`, {
+            const response = await fetch(`${backend}/api/test/auth`, {
                 headers: {'Authorization': `Bearer ${jwt}`},
             });
             console.log(response);

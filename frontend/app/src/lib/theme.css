@@ -70,3 +70,10 @@ a:active {
 a:disabled {
     color: var(--color-a-disabled);
 }
+
+.colums {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -0.75rem;
+    margin-left: -0.75rem;
+}

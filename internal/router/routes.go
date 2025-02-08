@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -43,37 +44,41 @@ func StartServer() error {
 	rootRouter.Handle("", http.FileServer(http.Dir("./frontend/static")))
 
 	rootRouter.Endpoint("/status", http.MethodGet, statusHandler, nil)
+	apiRouter := rootRouter.Subrouter(server.Config[GenericHandlerFunc]{
+		PathPrefix: "/api",
+	})
+	apiRouter.Endpoint("/domain", http.MethodGet, h.domainListHandler, nil)
+	//apiRouter.Endpoint("/domain/{id}", http.MethodGet, h.domainGetHandler, nil)
+	apiRouter.Endpoint("/user", http.MethodGet, h.userListHandler, nil)
+
+	protectedapiRouter := apiRouter.Subrouter(server.Config[GenericHandlerFunc]{
+		PathPrefix: "/protected",
+		Middleware: []server.MiddlewareFunc{JWTMiddleware},
+	})
+	protectedapiRouter.Endpoint("/domain", http.MethodPost, h.domainCreateHandler, nil)
+	protectedapiRouter.Endpoint("/user", http.MethodPost, h.userCreateHandler, nil)
 
 	env := os.Getenv("ENVIRONMENT")
 	if env == "dev" {
-		testRouter := rootRouter.Subrouter(server.Config[GenericHandlerFunc]{
+		testRouter := apiRouter.Subrouter(server.Config[GenericHandlerFunc]{
 			PathPrefix: "/test",
 		})
 		testRouter.Endpoint("/error", http.MethodGet, testErrorHandler, nil)
 		testRouter.Endpoint("/error", http.MethodPost, testErrorHandler, nil)
 		testRouter.Endpoint("/jwt", http.MethodPost, testCreateJWTHandler, nil)
+		testRouter.Endpoint("/list", http.MethodGet, func(r *http.Request) (data, meta any, status int, _ error) {
+			return rootRouter.ListRoutes(), nil, http.StatusOK, nil
+		}, nil)
 
 		rootRouter.Subrouter(server.Config[GenericHandlerFunc]{
 			PathPrefix: "/test/auth",
 			Middleware: []server.MiddlewareFunc{JWTMiddleware},
 		}).Endpoint("", http.MethodGet, statusHandler, nil)
 
-		apiRouter := rootRouter.Subrouter(server.Config[GenericHandlerFunc]{
-			PathPrefix: "/api",
-		})
-		apiRouter.Endpoint("/domain", http.MethodGet, h.domainListHandler, nil)
-		//apiRouter.Endpoint("/domain/{id}", http.MethodGet, h.domainGetHandler, nil)
-		apiRouter.Endpoint("/user", http.MethodGet, h.userListHandler, nil)
-
-		protectedapiRouter := apiRouter.Subrouter(server.Config[GenericHandlerFunc]{
-			PathPrefix: "/protected",
-			Middleware: []server.MiddlewareFunc{JWTMiddleware},
-		})
-		protectedapiRouter.Endpoint("/domain", http.MethodPost, h.domainCreateHandler, nil)
-		protectedapiRouter.Endpoint("/user", http.MethodPost, h.userCreateHandler, nil)
 	}
 
 	port := GetPort()
+	fmt.Println(rootRouter.ListRoutes())
 	s := rootRouter.NewServer(port, nil)
 	log.Println("Starting server at http://localhost" + port)
 	log.Fatal(s.ListenAndServe())

@@ -6,7 +6,7 @@
     let routes = $state({});
 
     onMount(async function() {
-        const response = await fetch(`${backend}/api`);
+        const response = await fetch(`${backend}/api/test/list`);
         let j = await response.json();
         //console.log(j);
         routes = j.data;
@@ -20,13 +20,18 @@
 <Header />
 
 
+<h2> Links </h2>
+<a href="/admin/request">Requests</a>
+<a href="/admin">Admin</a>
+
 <h2>Routes</h2>
-{#each Object.entries(routes) as [method, rs]}
-    <p>{method}</p>
+{#each Object.entries(routes) as [route, methods]}
     <ul>
-        {#each rs as route}
-            <li><a href='{route}'>{route}</a></li>
-        {/each}
+        {#if methods.includes('GET') }
+            <a href={route}>{route}</a> - {methods}
+        {:else}
+            {route} - {methods}
+        {/if}
     </ul>
 {/each}
 
