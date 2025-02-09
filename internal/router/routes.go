@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/mvndaai/ctxerr"
 	"github.com/mvndaai/known-socially/internal/config"
@@ -69,7 +68,7 @@ func StartServer() error {
 	protectedapiRouter.Endpoint("/user", http.MethodPost, h.userCreateHandler, nil)
 	protectedapiRouter.Endpoint("/logout", http.MethodPost, h.logoutHandler, nil)
 
-	env := os.Getenv("ENVIRONMENT")
+	env := config.GetEnviroment()
 	if env == "dev" {
 		testRouter := apiRouter.Subrouter(server.Config[GenericHandlerFunc]{
 			PathPrefix: "/test",

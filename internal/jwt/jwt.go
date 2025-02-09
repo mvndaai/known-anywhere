@@ -4,13 +4,13 @@ import (
 	"context"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/mvndaai/ctxerr"
+	"github.com/mvndaai/known-socially/internal/config"
 )
 
 const (
@@ -24,15 +24,8 @@ type JWTClaims struct {
 }
 
 func issuer() string {
-	env := os.Getenv("ENVIRONMENT")
+	env := config.GetEnviroment()
 	return "ks-" + env
-}
-func secret() []byte {
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		panic("JWT_SECRET not set")
-	}
-	return []byte(secret)
 }
 
 func (c JWTClaims) Valid() error {
@@ -104,7 +97,7 @@ func GetJWTClaims(r *http.Request) (*JWTClaims, error) {
 		if !ok {
 			return "", ctxerr.NewHTTP(ctx, "e4cd2a10-e084-4186-85a5-1788fcfad945", "", http.StatusUnauthorized, "bad token signing method")
 		}
-		return secret(), nil
+		return config.JWTSecret(), nil
 	})
 	if err != nil {
 		return nil, ctxerr.WrapHTTP(ctx, err, "a6c3217d-0f6b-4153-8789-128e5cefc43d", err.Error(), http.StatusUnauthorized)
@@ -118,7 +111,7 @@ func GetJWTClaims(r *http.Request) (*JWTClaims, error) {
 
 // GenerateJWT creates a JWT with our claims
 func GenerateJWT(ctx context.Context, claims JWTClaims) (string, error) {
-	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(secret())
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(config.JWTSecret())
 	if err != nil {
 		return "", ctxerr.Wrap(ctx, err, "757b2749-1bea-4d79-91e0-826766773357", "could not sign jwt")
 	}

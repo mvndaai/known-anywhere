@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
-	"os"
-	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/mvndaai/ctxerr"
 	ctxerrhttp "github.com/mvndaai/ctxerr/http"
+	"github.com/mvndaai/known-socially/internal/config"
 	"github.com/mvndaai/known-socially/internal/db"
 	"github.com/mvndaai/known-socially/internal/jwt"
 	"github.com/mvndaai/known-socially/internal/types"
@@ -47,7 +46,7 @@ func JWTMiddleware(pg *db.DB) func(http.HandlerFunc) http.HandlerFunc {
 			}()
 			if err != nil {
 				ctxerr.Handle(err)
-				debugErrors, _ := strconv.ParseBool(os.Getenv("DEBUG_ERRORS"))
+				debugErrors := config.DebugErrors()
 				status, errorResp := ctxerrhttp.StatusCodeAndResponse(err, debugErrors, debugErrors)
 				b, _ := json.Marshal(errorResp)
 				http.Error(w, string(b), status)

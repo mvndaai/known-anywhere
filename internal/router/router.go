@@ -3,11 +3,11 @@ package router
 import (
 	"encoding/json"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/mvndaai/ctxerr"
 	ctxerrhttp "github.com/mvndaai/ctxerr/http"
+	"github.com/mvndaai/known-socially/internal/config"
 )
 
 type (
@@ -21,13 +21,6 @@ type (
 	}
 )
 
-func GetPort() string {
-	if v := os.Getenv("PORT"); v != "" {
-		return ":" + v
-	}
-	return ":8080"
-}
-
 type GenericHandlerFunc func(r *http.Request) (data, meta any, status int, _ error)
 
 func GenericToHTTP(handler GenericHandlerFunc) http.HandlerFunc {
@@ -36,7 +29,7 @@ func GenericToHTTP(handler GenericHandlerFunc) http.HandlerFunc {
 		data, meta, status, err := handler(r)
 		if err != nil {
 			ctxerr.Handle(err)
-			debugErrors, _ := strconv.ParseBool(os.Getenv("DEBUG_ERRORS"))
+			debugErrors := config.DebugErrors()
 			var errorResp ctxerrhttp.ErrorResponse
 			status, errorResp = ctxerrhttp.StatusCodeAndResponse(err, debugErrors, debugErrors)
 			ret.Error = &errorResp.Error

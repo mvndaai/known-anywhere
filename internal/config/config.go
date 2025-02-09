@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 )
 
 func GetPort() string {
@@ -18,6 +19,11 @@ func GetEnviroment() string {
 		return "dev"
 	}
 	return env
+}
+
+func DebugErrors() bool {
+	debugErrors, _ := strconv.ParseBool(os.Getenv("DEBUG_ERRORS"))
+	return debugErrors
 }
 
 type postgresConfig struct {
@@ -47,4 +53,12 @@ func GetPostgresConfig() postgresConfig {
 
 func (v postgresConfig) DataSourceName() string {
 	return fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s", v.User, v.Password, v.DBName, v.SSLMode)
+}
+
+func JWTSecret() []byte {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		panic("JWT_SECRET not set")
+	}
+	return []byte(secret)
 }
