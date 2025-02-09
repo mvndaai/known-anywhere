@@ -15,8 +15,16 @@ import (
 	"github.com/mvndaai/validjson"
 )
 
-func StartServer(ctx context.Context, db *db.DB) error {
-	h, err := NewHandler(context.Background())
+func StartServer() error {
+	ctx := context.Background()
+
+	db, err := db.New(ctx)
+	if err != nil {
+		return ctxerr.QuickWrap(ctx, err)
+	}
+	defer db.Close(ctx)
+
+	h, err := NewHandler(ctx)
 	if err != nil {
 		return ctxerr.QuickWrap(ctx, err)
 	}
