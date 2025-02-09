@@ -16,7 +16,6 @@ func init() {
 
 type (
 	Config struct {
-		//port        int    `key:"PORT" default:"8081"`
 		Env         string `key:"ENVIRONMENT" default:"dev"`
 		Postgres    postgres
 		JWTSecret   string `key:"JWT_SECRET" required:"true"`
@@ -25,8 +24,8 @@ type (
 	}
 
 	postgres struct {
-		Host     string `key:"POSTGRES_HOST"`
-		Port     string `key:"POSTGRES_PORT"`
+		Host     string `key:"POSTGRES_HOST" default:"localhost"`
+		Port     int    `key:"POSTGRES_PORT" default:"5432"`
 		User     string `key:"POSTGRES_USER"`
 		Password string `key:"POSTGRES_PASSWORD"`
 		DBName   string `key:"POSTGRES_DB"`
@@ -42,7 +41,7 @@ func Get() Config             { return c }
 func (c Config) Port() string { return fmt.Sprintf(":%d", c.Formated.Port) }
 
 func (v postgres) DataSourceName() string {
-	return fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s", v.User, v.Password, v.DBName, v.SSLMode)
+	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", v.Host, v.Port, v.User, v.Password, v.DBName, v.SSLMode)
 }
 
 func processStruct(v reflect.Value) {
