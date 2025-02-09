@@ -11,6 +11,8 @@ import (
 	"github.com/google/uuid"
 )
 
+// TODO make this work with go install
+
 func main() {
 	err := errorMain()
 	if err != nil {
@@ -202,6 +204,10 @@ func invalidCodes(gps []grepParts, format string) []grepParts {
 }
 
 func fixCodes(format string, gps []grepParts) error {
+	if len(gps) == 0 {
+		return nil
+	}
+
 	var f func(code string) string
 	switch format {
 	case FormatUUID:
