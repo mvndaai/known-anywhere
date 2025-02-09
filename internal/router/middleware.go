@@ -6,16 +6,14 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/mvndaai/ctxerr"
 	ctxerrhttp "github.com/mvndaai/ctxerr/http"
 	"github.com/mvndaai/known-socially/internal/config"
 	"github.com/mvndaai/known-socially/internal/db"
 	"github.com/mvndaai/known-socially/internal/jwt"
-	"github.com/mvndaai/known-socially/internal/types"
 )
 
-func JWTMiddleware(pg *db.DB) func(http.HandlerFunc) http.HandlerFunc {
+func JWTMiddleware(db *db.DB) func(http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -29,17 +27,10 @@ func JWTMiddleware(pg *db.DB) func(http.HandlerFunc) http.HandlerFunc {
 				if err != nil {
 					return ctxerr.WrapHTTP(ctx, err, "d0257175-2fbd-46e8-9ef5-9dc1212c5491", "failed jwt claims", http.StatusUnauthorized, "failed to ensure claims")
 				}
-				if pg != nil {
-					jwtID, err := uuid.Parse(claims.ID)
-					if err != nil {
-						return ctxerr.WrapHTTP(ctx, err, "a938b89e-5c87-4078-a342-68e6ab643d59", "JWT ID not a uuid", http.StatusBadRequest, "jwt id not uuid")
-					}
-					users, _, err := pg.ListLogout(ctx, types.Logout{JWTID: jwtID}, types.Pagination{})
+				if db != nil {
+					err = db.JWTAllowed(ctx, claims.Subject, claims.ID)
 					if err != nil {
 						return ctxerr.QuickWrap(ctx, err)
-					}
-					if len(users) > 0 {
-						return ctxerr.NewHTTP(ctx, "bedd9e82-afb5-4593-989c-bd2a02b03265", "jwt logged out", http.StatusUnauthorized, "jwt id logged out")
 					}
 				}
 				return nil

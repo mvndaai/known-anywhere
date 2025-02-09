@@ -107,6 +107,7 @@ type (
 	Logout struct {
 		JWTID      uuid.UUID `json:"jwt_id"`
 		Expiration time.Time `json:"expiration"`
+		UserID     uuid.UUID `json:"user_id"`
 	}
 )
 

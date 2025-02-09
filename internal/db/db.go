@@ -15,7 +15,7 @@ import (
 
 type DB struct {
 	db    *sql.DB
-	cache Cache
+	cache *CacheImpl
 }
 
 func New(ctx context.Context) (*DB, error) {
@@ -122,17 +122,26 @@ func (wc *whereClause) nextVar() string {
 	return fmt.Sprintf("$%d", wc.varCount)
 }
 
+type Wheres struct {
+	where string
+	arg   any
+}
+
 func listItems[T any, F any](
 	ctx context.Context,
 	db *sql.DB,
 	tableName string,
 	filters F,
 	pagination types.Pagination,
+	wheres []Wheres,
 	scan func(*sql.Rows) (T, error),
 ) ([]T, types.PaginationResponse, error) {
 	pagination.Normalize()
 	pr := types.PaginationResponse{}
 	wc := whereClause{}
+	for _, w := range wheres {
+		wc.Add(w.where, w.arg)
+	}
 
 	selectFields := getSelectFields[T]()
 

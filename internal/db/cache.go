@@ -12,14 +12,11 @@ import (
 const cacheFmt = "%s:%s:%s" //env:type:columnName:columnValue
 const cacheExpire = 5 * time.Minute
 
-type Cache interface {
-}
-
 type CacheImpl struct {
 	cache *cache.Cache
 }
 
-func newCache() Cache {
+func newCache() *CacheImpl {
 	c := cache.New(5*time.Minute, 10*time.Minute)
 	return &CacheImpl{cache: c}
 }
@@ -27,11 +24,11 @@ func newCache() Cache {
 func logoutKey(userID uuid.UUID) string {
 	return fmt.Sprintf(cacheFmt, "logout", "user_id", userID.String())
 }
-func (c *CacheImpl) SetLogout(userID uuid.UUID, items []types.Logout) {
+func (c *CacheImpl) SetJWTLogout(userID uuid.UUID, items []types.Logout) {
 	c.cache.Set(logoutKey(userID), items, cacheExpire)
 }
 
-func (c *CacheImpl) GetLogout(userID uuid.UUID) ([]types.Logout, bool) {
+func (c *CacheImpl) GetJWTLogout(userID uuid.UUID) ([]types.Logout, bool) {
 	items, ok := c.cache.Get(logoutKey(userID))
 	if !ok {
 		return nil, false
@@ -39,6 +36,6 @@ func (c *CacheImpl) GetLogout(userID uuid.UUID) ([]types.Logout, bool) {
 	return items.([]types.Logout), true
 }
 
-func (c *CacheImpl) DeleteLogout(userID uuid.UUID) {
+func (c *CacheImpl) DeleteJWTLogout(userID uuid.UUID) {
 	c.cache.Delete(logoutKey(userID))
 }

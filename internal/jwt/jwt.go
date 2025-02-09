@@ -91,6 +91,9 @@ func (c *JWTClaims) EnsureClaims(ctx context.Context, method, path string, param
 func GetJWTClaims(r *http.Request) (*JWTClaims, error) {
 	ctx := r.Context()
 	jwtToken := strings.TrimPrefix(r.Header.Get(HeaderAuthorization), HeaderAuthorizationPrefix)
+	if jwtToken == "" {
+		return nil, ctxerr.NewHTTP(ctx, "670a3fb3-1539-4a20-acdd-0bb0f425bf95", "missing auth token", http.StatusUnauthorized, "missing token")
+	}
 	claims := &JWTClaims{}
 	_, err := jwt.ParseWithClaims(jwtToken, claims, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)

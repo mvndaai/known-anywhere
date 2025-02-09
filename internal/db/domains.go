@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/google/uuid"
+	"github.com/mvndaai/ctxerr"
 	"github.com/mvndaai/known-socially/internal/jwt"
 	"github.com/mvndaai/known-socially/internal/types"
 )
@@ -28,16 +29,19 @@ func scanDomain(scanner interface {
 
 func (v *DB) CreateDomain(ctx context.Context, d types.DomainCreate) (uuid.UUID, error) {
 	creator := jwt.SubjectFromContext(ctx)
-	return insertAndReturnID(ctx, v.db, tableDomains, d, columnValue{name: "creator", value: creator})
+	id, err := insertAndReturnID(ctx, v.db, tableDomains, d, columnValue{name: "creator", value: creator})
+	return id, ctxerr.QuickWrap(ctx, err)
 }
 
 func (v *DB) GetDomain(ctx context.Context, id string) (types.Domain, error) {
-	return get(ctx, v.db, tableDomains, id, scanDomain)
+	vs, err := get(ctx, v.db, tableDomains, id, scanDomain)
+	return vs, ctxerr.QuickWrap(ctx, err)
 }
 
 func (v *DB) ListDomains(ctx context.Context, filters types.DomainCreate, pagination types.Pagination) ([]types.Domain, types.PaginationResponse, error) {
-	return listItems(ctx, v.db, tableDomains, filters, pagination,
+	vs, pg, err := listItems(ctx, v.db, tableDomains, filters, pagination, nil,
 		func(rows *sql.Rows) (types.Domain, error) {
 			return scanDomain(rows)
 		})
+	return vs, pg, ctxerr.QuickWrap(ctx, err)
 }
