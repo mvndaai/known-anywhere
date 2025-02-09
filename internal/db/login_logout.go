@@ -28,13 +28,13 @@ func scanLogout(scanner interface {
 	return d, err
 }
 
-func (pg *Postgres) LogoutCreate(ctx context.Context, l types.Logout) (uuid.UUID, error) {
+func (v *DB) LogoutCreate(ctx context.Context, l types.Logout) (uuid.UUID, error) {
 	userID := jwt.SubjectFromContext(ctx)
-	return insertAndReturnID(ctx, pg.db, tableLogout, l, columnValue{name: "user_id", value: userID})
+	return insertAndReturnID(ctx, v.db, tableLogout, l, columnValue{name: "user_id", value: userID})
 }
 
-func (pg *Postgres) ListLogout(ctx context.Context, filters types.Logout, pagination types.Pagination) ([]types.Logout, types.PaginationResponse, error) {
-	return listItems(ctx, pg.db, tableLogout, filters, pagination,
+func (v *DB) ListLogout(ctx context.Context, filters types.Logout, pagination types.Pagination) ([]types.Logout, types.PaginationResponse, error) {
+	return listItems(ctx, v.db, tableLogout, filters, pagination,
 		func(rows *sql.Rows) (types.Logout, error) {
 			return scanLogout(rows)
 		})

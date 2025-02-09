@@ -16,7 +16,7 @@ import (
 	"github.com/mvndaai/known-socially/internal/types"
 )
 
-func JWTMiddleware(pg *db.Postgres) func(http.HandlerFunc) http.HandlerFunc {
+func JWTMiddleware(pg *db.DB) func(http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()

@@ -8,7 +8,7 @@ import (
 )
 
 type Handler struct {
-	db *db.Postgres
+	db *db.DB
 }
 
 func (h *Handler) Close() error {
@@ -19,11 +19,10 @@ func (h *Handler) Close() error {
 	return nil
 }
 
-func NewHandler() (Handler, error) {
-	db := db.Postgres{}
-	err := db.Connect(context.Background())
+func NewHandler(ctx context.Context) (Handler, error) {
+	db, err := db.New(ctx)
 	if err != nil {
 		return Handler{}, ctxerr.QuickWrap(context.Background(), err)
 	}
-	return Handler{db: &db}, nil
+	return Handler{db: db}, nil
 }

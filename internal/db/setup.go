@@ -8,9 +8,9 @@ import (
 	"github.com/mvndaai/ctxerr"
 )
 
-func (pg *Postgres) CreateTables(ctx context.Context) error {
+func (v *DB) CreateTables(ctx context.Context) error {
 	// https://postgresql.verite.pro/blog/2024/07/15/uuid-v7-pure-sql.html
-	_, err := pg.db.ExecContext(ctx, `
+	_, err := v.db.ExecContext(ctx, `
 		CREATE OR REPLACE FUNCTION uuidv7() RETURNS uuid
 		AS $$
 		select encode(
@@ -27,7 +27,7 @@ func (pg *Postgres) CreateTables(ctx context.Context) error {
 	}
 
 	// Create trigger function to update modified column
-	_, err = pg.db.ExecContext(ctx, `
+	_, err = v.db.ExecContext(ctx, `
 		CREATE OR REPLACE FUNCTION update_modified_column()
 		RETURNS TRIGGER AS $$
 		BEGIN
@@ -134,14 +134,14 @@ func (pg *Postgres) CreateTables(ctx context.Context) error {
 
 	for name, table := range tables {
 		q := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s %s", name, table)
-		_, err := pg.db.ExecContext(ctx, q)
+		_, err := v.db.ExecContext(ctx, q)
 		if err != nil {
 			ctx = ctxerr.SetField(ctx, "query", q)
 			return ctxerr.Wrap(ctx, err, "930187a3-bb61-4f6f-ae1f-3d54b700aff0", "failed to create table:", name)
 		}
 
 		// Create trigger for users table
-		_, err = pg.db.ExecContext(ctx, fmt.Sprintf(`
+		_, err = v.db.ExecContext(ctx, fmt.Sprintf(`
 			CREATE OR REPLACE TRIGGER update_%s_modified
 			BEFORE UPDATE ON %s
 			FOR EACH ROW

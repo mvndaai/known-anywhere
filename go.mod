@@ -9,6 +9,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/mvndaai/ctxerr v0.14.0
 	github.com/mvndaai/validjson v0.1.0
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 )
 
 require (

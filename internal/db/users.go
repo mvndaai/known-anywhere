@@ -24,16 +24,16 @@ func scanUser(scanner interface {
 	return u, err
 }
 
-func (pg *Postgres) CreateUser(ctx context.Context, u types.UserCreate) (uuid.UUID, error) {
-	return insertAndReturnID(ctx, pg.db, tableUsers, u)
+func (v *DB) CreateUser(ctx context.Context, u types.UserCreate) (uuid.UUID, error) {
+	return insertAndReturnID(ctx, v.db, tableUsers, u)
 }
 
-func (pg *Postgres) GetUser(ctx context.Context, id string) (types.User, error) {
-	return get(ctx, pg.db, tableUsers, id, scanUser)
+func (v *DB) GetUser(ctx context.Context, id string) (types.User, error) {
+	return get(ctx, v.db, tableUsers, id, scanUser)
 }
 
-func (pg *Postgres) ListUsers(ctx context.Context, filters types.UserCreate, pagination types.Pagination) ([]types.User, types.PaginationResponse, error) {
-	return listItems(ctx, pg.db, tableUsers, filters, pagination,
+func (v *DB) ListUsers(ctx context.Context, filters types.UserCreate, pagination types.Pagination) ([]types.User, types.PaginationResponse, error) {
+	return listItems(ctx, v.db, tableUsers, filters, pagination,
 		func(rows *sql.Rows) (types.User, error) {
 			return scanUser(rows)
 		})

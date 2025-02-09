@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/mvndaai/ctxerr"
+	"github.com/mvndaai/known-socially/internal/config"
 	"github.com/mvndaai/known-socially/internal/db"
 	"github.com/mvndaai/known-socially/internal/jwt"
 	"github.com/mvndaai/known-socially/internal/router/server"
@@ -14,10 +15,10 @@ import (
 	"github.com/mvndaai/validjson"
 )
 
-func StartServer(pg *db.Postgres) error {
-	h, err := NewHandler()
+func StartServer(ctx context.Context, db *db.DB) error {
+	h, err := NewHandler(context.Background())
 	if err != nil {
-		return ctxerr.QuickWrap(context.Background(), err)
+		return ctxerr.QuickWrap(ctx, err)
 	}
 	defer h.Close()
 
@@ -36,7 +37,7 @@ func StartServer(pg *db.Postgres) error {
 			Version:     "0.0.1",
 		})
 	if err != nil {
-		return ctxerr.Wrap(context.Background(), err, "120acdfb-98eb-4a65-a298-6619b8b7c942")
+		return ctxerr.Wrap(ctx, err, "120acdfb-98eb-4a65-a298-6619b8b7c942")
 	}
 
 	// Load the svelte static frontend files
@@ -51,7 +52,7 @@ func StartServer(pg *db.Postgres) error {
 	//apiRouter.Endpoint("/domain/{id}", http.MethodGet, h.domainGetHandler, nil)
 	apiRouter.Endpoint("/user", http.MethodGet, h.userListHandler, nil)
 
-	jwtMiddleware := JWTMiddleware(pg)
+	jwtMiddleware := JWTMiddleware(db)
 	protectedapiRouter := apiRouter.Subrouter(server.Config[GenericHandlerFunc]{
 		PathPrefix: "/protected",
 		Middleware: []server.MiddlewareFunc{jwtMiddleware, JWTSubjectMiddleware},
@@ -79,7 +80,7 @@ func StartServer(pg *db.Postgres) error {
 
 	}
 
-	port := GetPort()
+	port := config.GetPort()
 	s := rootRouter.NewServer(port, nil)
 	log.Printf("Starting '%s' server at http://localhost%s\n", env, port)
 	log.Fatal(s.ListenAndServe())

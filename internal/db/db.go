@@ -4,49 +4,35 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"os"
 	"reflect"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/mvndaai/ctxerr"
+	"github.com/mvndaai/known-socially/internal/config"
 	"github.com/mvndaai/known-socially/internal/types"
 )
 
-type Postgres struct {
-	db *sql.DB
+type DB struct {
+	db    *sql.DB
+	cache Cache
 }
 
-func (pg *Postgres) Connect(ctx context.Context) error {
-	// Connect to the database
-
-	un := os.Getenv("POSTGRES_USER")
-	pw := os.Getenv("POSTGRES_PASSWORD")
-	dbname := os.Getenv("POSTGRES_DB")
-	sslmode := os.Getenv("POSTGRES_SSLMODE")
-	if sslmode == "" {
-		sslmode = "disable"
-	}
-	// TODO add POSTGRES_HOST and POSTGRES_PORT
-
-	dbSorceName := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s", un, pw, dbname, sslmode)
-	var err error
-	pg.db, err = sql.Open("postgres", dbSorceName)
+func New(ctx context.Context) (*DB, error) {
+	postgress, err := sql.Open("postgres", config.GetPostgresConfig().DataSourceName())
 	if err != nil {
-		return ctxerr.Wrap(ctx, err, "e94bf5b7-5449-41a6-ae92-2103fa475845", "Failed to connect to the database")
+		return nil, ctxerr.Wrap(ctx, err, "e94bf5b7-5449-41a6-ae92-2103fa475845", "Failed to connect to postgres")
 	}
 
-	//err = pg.CreateTables(ctx)
-	//if err != nil {
-	//	return ctxerr.QuickWrap(ctx, err)
-	//}
-
-	return nil
+	return &DB{
+		db:    postgress,
+		cache: newCache(),
+	}, nil
 }
 
-func (pg *Postgres) Close(ctx context.Context) error {
+func (v *DB) Close(ctx context.Context) error {
 	// Close the database connection
-	err := pg.db.Close()
+	err := v.db.Close()
 	if err != nil {
 		return ctxerr.Wrap(ctx, err, "5f050fa7-37ec-4ba6-8268-aa8ae03dc045", "Failed to close the database connection")
 	}

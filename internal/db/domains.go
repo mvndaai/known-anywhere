@@ -26,17 +26,17 @@ func scanDomain(scanner interface {
 	return d, err
 }
 
-func (pg *Postgres) CreateDomain(ctx context.Context, d types.DomainCreate) (uuid.UUID, error) {
+func (v *DB) CreateDomain(ctx context.Context, d types.DomainCreate) (uuid.UUID, error) {
 	creator := jwt.SubjectFromContext(ctx)
-	return insertAndReturnID(ctx, pg.db, tableDomains, d, columnValue{name: "creator", value: creator})
+	return insertAndReturnID(ctx, v.db, tableDomains, d, columnValue{name: "creator", value: creator})
 }
 
-func (pg *Postgres) GetDomain(ctx context.Context, id string) (types.Domain, error) {
-	return get(ctx, pg.db, tableDomains, id, scanDomain)
+func (v *DB) GetDomain(ctx context.Context, id string) (types.Domain, error) {
+	return get(ctx, v.db, tableDomains, id, scanDomain)
 }
 
-func (pg *Postgres) ListDomains(ctx context.Context, filters types.DomainCreate, pagination types.Pagination) ([]types.Domain, types.PaginationResponse, error) {
-	return listItems(ctx, pg.db, tableDomains, filters, pagination,
+func (v *DB) ListDomains(ctx context.Context, filters types.DomainCreate, pagination types.Pagination) ([]types.Domain, types.PaginationResponse, error) {
+	return listItems(ctx, v.db, tableDomains, filters, pagination,
 		func(rows *sql.Rows) (types.Domain, error) {
 			return scanDomain(rows)
 		})

@@ -13,15 +13,14 @@ import (
 func main() {
 	ctx := context.Background()
 
-	db := &db.Postgres{}
-	err := db.Connect(ctx)
+	db, err := db.New(ctx)
 	if err != nil {
 		ctxerr.Handle(err)
 		return
 	}
 	defer db.Close(ctx)
 
-	err = router.StartServer(db)
+	err = router.StartServer(ctx, db)
 	if err != nil {
 		ctxerr.Handle(err)
 		return
