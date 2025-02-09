@@ -29,7 +29,7 @@ func GenericToHTTP(handler GenericHandlerFunc) http.HandlerFunc {
 		data, meta, status, err := handler(r)
 		if err != nil {
 			ctxerr.Handle(err)
-			debugErrors := config.DebugErrors()
+			debugErrors := config.Get().DebugErrors
 			var errorResp ctxerrhttp.ErrorResponse
 			status, errorResp = ctxerrhttp.StatusCodeAndResponse(err, debugErrors, debugErrors)
 			ret.Error = &errorResp.Error

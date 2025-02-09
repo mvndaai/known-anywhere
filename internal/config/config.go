@@ -3,62 +3,93 @@ package config
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 )
 
-func GetPort() string {
-	if v := os.Getenv("PORT"); v != "" {
-		return ":" + v
-	}
-	return ":8080"
+var c Config
+
+func init() {
+	c = Config{}
+	processStruct(reflect.ValueOf(&c).Elem())
 }
 
-func GetEnviroment() string {
-	env := os.Getenv("ENVIRONMENT")
-	if env == "" {
-		return "dev"
-	}
-	return env
-}
-
-func DebugErrors() bool {
-	debugErrors, _ := strconv.ParseBool(os.Getenv("DEBUG_ERRORS"))
-	return debugErrors
-}
-
-type postgresConfig struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	DBName   string
-	SSLMode  string
-}
-
-func GetPostgresConfig() postgresConfig {
-	sslMode := os.Getenv("POSTGRES_SSLMODE")
-	if sslMode == "" {
-		sslMode = "disable"
+type (
+	Config struct {
+		//port        int    `key:"PORT" default:"8081"`
+		Env         string `key:"ENVIRONMENT" default:"dev"`
+		Postgres    postgres
+		JWTSecret   string `key:"JWT_SECRET" required:"true"`
+		DebugErrors bool   `key:"DEBUG_ERRORS" default:"false"`
+		Formated    formated
 	}
 
-	return postgresConfig{
-		Host:     os.Getenv("POSTGRES_HOST"), // TODO
-		Port:     os.Getenv("POSTGRES_PORT"), // TODO
-		User:     os.Getenv("POSTGRES_USER"),
-		Password: os.Getenv("POSTGRES_PASSWORD"),
-		DBName:   os.Getenv("POSTGRES_DB"),
-		SSLMode:  sslMode,
+	postgres struct {
+		Host     string `key:"POSTGRES_HOST"`
+		Port     string `key:"POSTGRES_PORT"`
+		User     string `key:"POSTGRES_USER"`
+		Password string `key:"POSTGRES_PASSWORD"`
+		DBName   string `key:"POSTGRES_DB"`
+		SSLMode  string `key:"POSTGRES_SSLMODE" default:"disable"`
 	}
-}
 
-func (v postgresConfig) DataSourceName() string {
+	formated struct {
+		Port int `key:"PORT" default:"8080"`
+	}
+)
+
+func Get() Config             { return c }
+func (c Config) Port() string { return fmt.Sprintf(":%d", c.Formated.Port) }
+
+func (v postgres) DataSourceName() string {
 	return fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s", v.User, v.Password, v.DBName, v.SSLMode)
 }
 
-func JWTSecret() []byte {
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		panic("JWT_SECRET not set")
+func processStruct(v reflect.Value) {
+	t := v.Type()
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		if field.Anonymous {
+			continue
+		}
+
+		// If it's a struct, process it recursively
+		if field.Type.Kind() == reflect.Struct {
+			processStruct(v.Field(i))
+			continue
+		}
+
+		key := field.Tag.Get("key")
+		defaultVal := field.Tag.Get("default")
+		required := field.Tag.Get("required")
+
+		// Get environment variable
+		val := os.Getenv(key)
+		if val == "" {
+			val = defaultVal
+		}
+		if val == "" {
+			if required == "true" {
+				panic(fmt.Sprintf("Required environment variable '%s' not set", key))
+			}
+		}
+
+		//log.Printf("key: %s, default: %s, required: %s, value: %s\n", key, defaultVal, required, val)
+		// Set the field value
+		if val != "" {
+			switch field.Type.Kind() {
+			case reflect.String:
+				v.Field(i).SetString(val)
+			case reflect.Int:
+				iVal, err := strconv.Atoi(val)
+				if err != nil {
+					panic(fmt.Sprintf("Error converting '%s' for '%s'  to int: %s", val, key, err))
+				}
+				v.Field(i).SetInt(int64(iVal))
+			case reflect.Bool:
+				bVal, _ := strconv.ParseBool(val)
+				v.Field(i).SetBool(bVal)
+			}
+		}
 	}
-	return []byte(secret)
 }

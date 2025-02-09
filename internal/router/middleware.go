@@ -37,7 +37,7 @@ func JWTMiddleware(db *db.DB) func(http.HandlerFunc) http.HandlerFunc {
 			}()
 			if err != nil {
 				ctxerr.Handle(err)
-				debugErrors := config.DebugErrors()
+				debugErrors := config.Get().DebugErrors
 				status, errorResp := ctxerrhttp.StatusCodeAndResponse(err, debugErrors, debugErrors)
 				b, _ := json.Marshal(errorResp)
 				http.Error(w, string(b), status)

@@ -24,7 +24,7 @@ type JWTClaims struct {
 }
 
 func issuer() string {
-	env := config.GetEnviroment()
+	env := config.Get().Env
 	return "ks-" + env
 }
 
@@ -100,7 +100,7 @@ func GetJWTClaims(r *http.Request) (*JWTClaims, error) {
 		if !ok {
 			return "", ctxerr.NewHTTP(ctx, "e4cd2a10-e084-4186-85a5-1788fcfad945", "", http.StatusUnauthorized, "bad token signing method")
 		}
-		return config.JWTSecret(), nil
+		return config.Get().JWTSecret, nil
 	})
 	if err != nil {
 		return nil, ctxerr.WrapHTTP(ctx, err, "a6c3217d-0f6b-4153-8789-128e5cefc43d", err.Error(), http.StatusUnauthorized)
@@ -114,7 +114,7 @@ func GetJWTClaims(r *http.Request) (*JWTClaims, error) {
 
 // GenerateJWT creates a JWT with our claims
 func GenerateJWT(ctx context.Context, claims JWTClaims) (string, error) {
-	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(config.JWTSecret())
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(config.Get().JWTSecret)
 	if err != nil {
 		return "", ctxerr.Wrap(ctx, err, "757b2749-1bea-4d79-91e0-826766773357", "could not sign jwt")
 	}

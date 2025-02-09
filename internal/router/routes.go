@@ -68,7 +68,7 @@ func StartServer() error {
 	protectedapiRouter.Endpoint("/user", http.MethodPost, h.userCreateHandler, nil)
 	protectedapiRouter.Endpoint("/logout", http.MethodPost, h.logoutHandler, nil)
 
-	env := config.GetEnviroment()
+	env := config.Get().Env
 	if env == "dev" {
 		testRouter := apiRouter.Subrouter(server.Config[GenericHandlerFunc]{
 			PathPrefix: "/test",
@@ -87,7 +87,7 @@ func StartServer() error {
 
 	}
 
-	port := config.GetPort()
+	port := config.Get().Port()
 	s := rootRouter.NewServer(port, nil)
 	log.Printf("Starting '%s' server at http://localhost%s\n", env, port)
 	log.Fatal(s.ListenAndServe())

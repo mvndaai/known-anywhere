@@ -19,7 +19,7 @@ type DB struct {
 }
 
 func New(ctx context.Context) (*DB, error) {
-	postgress, err := sql.Open("postgres", config.GetPostgresConfig().DataSourceName())
+	postgress, err := sql.Open("postgres", config.Get().Postgres.DataSourceName())
 	if err != nil {
 		return nil, ctxerr.Wrap(ctx, err, "e94bf5b7-5449-41a6-ae92-2103fa475845", "Failed to connect to postgres")
 	}
