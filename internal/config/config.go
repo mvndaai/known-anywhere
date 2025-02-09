@@ -60,7 +60,7 @@ func processStruct(v reflect.Value) {
 
 		key := field.Tag.Get("key")
 		defaultVal := field.Tag.Get("default")
-		required := field.Tag.Get("required")
+		required, _ := strconv.ParseBool(field.Tag.Get("required"))
 
 		// Get environment variable
 		val := os.Getenv(key)
@@ -68,7 +68,7 @@ func processStruct(v reflect.Value) {
 			val = defaultVal
 		}
 		if val == "" {
-			if required == "true" {
+			if required {
 				panic(fmt.Sprintf("Required environment variable '%s' not set", key))
 			}
 		}
