@@ -43,9 +43,11 @@
         <dialog open={dialogOpen}>
             <button onclick={closeDialog}>X</button>
             <div>
-                <input type="text" bind:value={username} placeholder="Username" />
+                <button>Create Account</button>
+                <!--<input type="text" bind:value={username} placeholder="Username" />-->
                 <button>Log in</button>
 
+                <br/><br/><br/>
                 <JwtHelper />
             </div>
         </dialog>
