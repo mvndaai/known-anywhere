@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	tableLogout = "logout"
+	tableLogouts = "logouts"
 )
 
 func scanLogout(scanner interface {
@@ -34,12 +34,12 @@ func scanLogout(scanner interface {
 func (v *DB) LogoutCreate(ctx context.Context, l types.Logout) (uuid.UUID, error) {
 	l.UserID = jwt.SubjectFromContext(ctx)
 	v.cache.DeleteJWTLogout(l.UserID)
-	id, err := insertAndReturnID(ctx, v.db, tableLogout, l)
+	id, err := insertAndReturnID(ctx, v.db, tableLogouts, l)
 	return id, ctxerr.QuickWrap(ctx, err)
 }
 
 func (v *DB) ListLogout(ctx context.Context, filters types.Logout, pagination types.Pagination) ([]types.Logout, types.PaginationResponse, error) {
-	vs, pg, err := listItems(ctx, v.db, tableLogout, filters, pagination, nil,
+	vs, pg, err := listItems(ctx, v.db, tableLogouts, filters, pagination, nil,
 		func(rows *sql.Rows) (types.Logout, error) {
 			return scanLogout(rows)
 		})
@@ -54,7 +54,7 @@ func (v *DB) JWTAllowed(ctx context.Context, userID, jwtID string) error {
 	logouts, ok := v.cache.GetJWTLogout(userIDUUID)
 	if !ok {
 		var err error
-		logouts, _, err = listItems(ctx, v.db, tableLogout, types.Logout{UserID: userIDUUID}, types.Pagination{Limit: 100}, []Wheres{{where: "expiration < now()"}},
+		logouts, _, err = listItems(ctx, v.db, tableLogouts, types.Logout{UserID: userIDUUID}, types.Pagination{Limit: 100}, []Wheres{{where: "expiration < now()"}},
 			func(rows *sql.Rows) (types.Logout, error) {
 				return scanLogout(rows)
 			})

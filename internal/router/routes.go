@@ -36,7 +36,7 @@ func StartServer() error {
 			//Middleware            []MiddlewareFunc
 			//DefaultParameters     openapi3.Parameters
 			//AllowedOptionsHeaders []string
-			GenericToHTTP: GenericToHTTP, // func(T) http.HandlerFunc
+			GenericToHTTP: GenericToHTTP,
 		},
 		server.DocConfig{
 			ServiceName: "known-socially",

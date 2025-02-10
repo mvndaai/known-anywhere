@@ -1,4 +1,5 @@
 //go:generate go run ./scripts/error_codes/error_codes.go -format uuid -location . -fix true
+//go:generate sh ./docker/build_frontend.sh
 
 package main
 

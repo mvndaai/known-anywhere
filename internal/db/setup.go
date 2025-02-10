@@ -52,7 +52,7 @@ func (v *DB) CreateTables(ctx context.Context) error {
 			created TIMESTAMP default CURRENT_TIMESTAMP,
 			modified TIMESTAMP default CURRENT_TIMESTAMP
 		)`,
-		"delete_audit": `(
+		"delete_audits": `(
 			id uuid DEFAULT uuidv7() PRIMARY KEY,
 			table_name TEXT NOT NULL,
 			row_id uuid NOT NULL,
@@ -126,7 +126,7 @@ func (v *DB) CreateTables(ctx context.Context) error {
 			UNIQUE (social_id, user_id)
 		);
 		COMMENT ON COLUMN social_votes.downvote IS 'if false then upvote';`,
-		"logout": `(
+		"logouts": `(
 			id uuid DEFAULT uuidv7() PRIMARY KEY,
 			jwt_id uuid NOT NULL,
 			expiration TIMESTAMP NOT NULL,
@@ -135,7 +135,7 @@ func (v *DB) CreateTables(ctx context.Context) error {
 			created TIMESTAMP default CURRENT_TIMESTAMP,
 			modified TIMESTAMP default CURRENT_TIMESTAMP
 		);
-		CREATE INDEX IF NOT EXISTS idx_logout_user_id ON logout (user_id);`,
+		CREATE INDEX IF NOT EXISTS idx_logout_user_id ON logouts (user_id);`,
 	}
 
 	for name, table := range tables {
