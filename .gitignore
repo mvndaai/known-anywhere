@@ -24,8 +24,11 @@ go.work.sum
 # env file
 .env
 docker/private_local_vars.sh
-# binary
+
+# binary/build
 known-socially
+bin/frontend
+
 
 # volumes
 docker/volumes

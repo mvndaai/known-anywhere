@@ -49,7 +49,7 @@ func StartServer() error {
 
 	// Load the svelte static frontend files
 	// https://codeandlife.com/2022/02/12/combine-golang-and-sveltekit-for-gui/
-	rootRouter.Handle("", http.FileServer(http.Dir("./frontend/static")))
+	rootRouter.Handle("", http.FileServer(http.Dir(config.Get().FrontendPath)))
 
 	rootRouter.Endpoint("/status", http.MethodGet, statusHandler, nil)
 	apiRouter := rootRouter.Subrouter(server.Config[GenericHandlerFunc]{

@@ -16,11 +16,12 @@ func init() {
 
 type (
 	Config struct {
-		Env         string `key:"ENVIRONMENT" default:"dev"`
-		Postgres    postgres
-		JWTSecret   string `key:"JWT_SECRET" required:"true"`
-		DebugErrors bool   `key:"DEBUG_ERRORS" default:"false"`
-		Formated    formated
+		Env          string `key:"ENVIRONMENT" default:"dev"`
+		Postgres     postgres
+		JWTSecret    string `key:"JWT_SECRET" required:"true"`
+		DebugErrors  bool   `key:"DEBUG_ERRORS" default:"false"`
+		Formated     formated
+		FrontendPath string `key:"FRONTEND_PATH" default:"./bin/frontend"`
 	}
 
 	postgres struct {
