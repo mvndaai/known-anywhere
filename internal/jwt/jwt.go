@@ -21,6 +21,7 @@ const (
 type JWTClaims struct {
 	jwt.RegisteredClaims
 	Username string `json:"username"`
+	// TODO should there be a way to act as?
 }
 
 func issuer() string {

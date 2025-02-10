@@ -64,12 +64,15 @@ func (v *DB) CreateTables(ctx context.Context) error {
 		"groups": `(
 			id uuid DEFAULT uuidv7() PRIMARY KEY,
 			description TEXT,
+			personal_user_id uuid references users(id),
 
 			deleted BOOLEAN default false,
 			creator uuid NOT NULL references users(id),
 			created TIMESTAMP default CURRENT_TIMESTAMP,
 			modified TIMESTAMP default CURRENT_TIMESTAMP
-		)`,
+		);
+		CREATE INDEX IF NOT EXISTS idx_groups_personal_user_id ON groups (personal_user_id);
+		COMMENT ON COLUMN groups.personal_user_id IS 'only filled if group is created by user for their own links';`,
 		"domains": `(
 			id uuid DEFAULT uuidv7() PRIMARY KEY,
 			display_name TEXT NOT NULL,
@@ -129,7 +132,8 @@ func (v *DB) CreateTables(ctx context.Context) error {
 			user_id uuid NOT NULL references users(id),
 			created TIMESTAMP default CURRENT_TIMESTAMP,
 			modified TIMESTAMP default CURRENT_TIMESTAMP
-		)`,
+		);
+		CREATE INDEX IF NOT EXISTS idx_logout_user_id ON logout (user_id);`,
 	}
 
 	for name, table := range tables {

@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
@@ -23,11 +25,20 @@ func New(ctx context.Context) (*DB, error) {
 	if err != nil {
 		return nil, ctxerr.Wrap(ctx, err, "e94bf5b7-5449-41a6-ae92-2103fa475845", "Failed to connect to postgres")
 	}
-
-	return &DB{
+	ret := &DB{
 		db:    postgress,
 		cache: newCache(),
-	}, nil
+	}
+
+	// Create tables if they don't exist
+	if bl, _ := strconv.ParseBool(os.Getenv("CREATE_TABLES")); bl {
+		err = ret.CreateTables(ctx)
+		if err != nil {
+			return nil, ctxerr.QuickWrap(ctx, err)
+		}
+	}
+
+	return ret, nil
 }
 
 func (v *DB) Close(ctx context.Context) error {
