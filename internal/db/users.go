@@ -50,7 +50,7 @@ func (v *DB) UsernameAvalaible(ctx context.Context, username string) error {
 		return ctxerr.QuickWrap(ctx, err)
 	}
 	if len(users) > 0 {
-		return ctxerr.NewHTTP(ctx, "", "Username is not avalaible", http.StatusBadRequest, "Username is not avalaible")
+		return ctxerr.NewHTTP(ctx, "33ec3b54-4673-4a0d-8836-cac4e555e6f9", "Username is not avalaible", http.StatusBadRequest, "Username is not avalaible")
 	}
 	return nil
 }
