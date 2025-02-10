@@ -123,8 +123,8 @@ func runGrep(location string, includeComments bool) ([]grepParts, error) {
 	return filteredLines, nil
 }
 
-var reWrap = regexp.MustCompile(`(ctxerr\.Wrap(?:HTTP)?(?:f)?\([^,]+, [^,]+, ")(?<code>[^"]*)(".*)`)
-var reNew = regexp.MustCompile(`(ctxerr\.New(?:HTTP)?(?:f)?\([^,]+, ")(?<code>[^"]*)(".*)`)
+var reWrap = regexp.MustCompile(`(ctxerr\.Wrap(?:HTTP)?(?:f)?\([^,]+, [^,]+, ")(?P<code>[^"]*)(".*)`)
+var reNew = regexp.MustCompile(`(ctxerr\.New(?:HTTP)?(?:f)?\([^,]+, ")(?P<code>[^"]*)(".*)`)
 
 type grepParts struct {
 	filePath string
@@ -148,12 +148,12 @@ func extractCode(line string) (grepParts, error) {
 	case reWrap.MatchString(line):
 		matches := reWrap.FindStringSubmatch(line)
 		if len(matches) > 2 {
-			r.code = matches[2]
+			r.code = matches[reWrap.SubexpIndex("code")]
 		}
 	case reNew.MatchString(line):
 		matches := reNew.FindStringSubmatch(line)
 		if len(matches) > 2 {
-			r.code = matches[2]
+			r.code = matches[reNew.SubexpIndex("code")]
 		}
 	default:
 		return r, fmt.Errorf("No match found: %s", line)
