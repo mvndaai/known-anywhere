@@ -3,12 +3,14 @@ package db
 import (
 	"context"
 	"fmt"
+	"log"
 
 	_ "github.com/lib/pq"
 	"github.com/mvndaai/ctxerr"
 )
 
 func (v *DB) CreateTables(ctx context.Context) error {
+	log.Println("creating tables")
 	// https://postgresql.verite.pro/blog/2024/07/15/uuid-v7-pure-sql.html
 	_, err := v.db.ExecContext(ctx, `
 		CREATE OR REPLACE FUNCTION uuidv7() RETURNS uuid
@@ -56,7 +58,7 @@ func (v *DB) CreateTables(ctx context.Context) error {
 			row_id uuid NOT NULL,
 
 			creator uuid NOT NULL references users(id),
-			deleted TIMESTAMP default CURRENT_TIMESTAMP,
+			deleted BOOLEAN default false,
 			created TIMESTAMP default CURRENT_TIMESTAMP,
 			modified TIMESTAMP default CURRENT_TIMESTAMP,
 			UNIQUE (table_name, row_id)

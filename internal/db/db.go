@@ -138,6 +138,20 @@ type Wheres struct {
 	arg   any
 }
 
+var tableHasDeleted = map[string]bool{
+	tableDomains:   true,
+	tableUsers:     true,
+	"groups":       true,
+	"domain_links": true,
+	"socials":      true,
+	"social_votes": true,
+}
+
+var tableHasPending = map[string]bool{
+	tableDomains:   true,
+	"domain_links": true,
+}
+
 func listItems[T any, F any](
 	ctx context.Context,
 	db *sql.DB,
@@ -152,6 +166,12 @@ func listItems[T any, F any](
 	wc := whereClause{}
 	for _, w := range wheres {
 		wc.Add(w.where, w.arg)
+	}
+	if !pagination.ShowDeleted && tableHasDeleted[tableName] {
+		wc.Add("deleted IS FALSE", nil)
+	}
+	if !pagination.ShowPending && tableHasPending[tableName] {
+		wc.Add("pending IS FALSE", nil)
 	}
 
 	selectFields := getSelectFields[T]()

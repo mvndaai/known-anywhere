@@ -30,8 +30,10 @@ func JSONTag(a any, name string) string {
 
 type (
 	Pagination struct {
-		Limit  int    `json:"limit"`
-		Cursor string `json:"cursor"`
+		Limit       int    `json:"limit"`
+		Cursor      string `json:"cursor"`
+		ShowDeleted bool   `json:"show_deleted,omitempty"`
+		ShowPending bool   `json:"show_pending,omitempty"`
 	}
 
 	PaginationResponse struct {

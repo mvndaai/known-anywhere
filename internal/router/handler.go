@@ -19,10 +19,6 @@ func (h *Handler) Close() error {
 	return nil
 }
 
-func NewHandler(ctx context.Context) (Handler, error) {
-	db, err := db.New(ctx)
-	if err != nil {
-		return Handler{}, ctxerr.QuickWrap(context.Background(), err)
-	}
+func NewHandler(ctx context.Context, db *db.DB) (Handler, error) {
 	return Handler{db: db}, nil
 }

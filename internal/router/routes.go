@@ -23,7 +23,7 @@ func StartServer() error {
 	}
 	defer db.Close(ctx)
 
-	h, err := NewHandler(ctx)
+	h, err := NewHandler(ctx, db)
 	if err != nil {
 		return ctxerr.QuickWrap(ctx, err)
 	}

@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/mvndaai/ctxerr"
@@ -41,4 +42,15 @@ func (v *DB) ListUsers(ctx context.Context, filters types.UserCreate, pagination
 			return scanUser(rows)
 		})
 	return vs, pg, ctxerr.QuickWrap(ctx, err)
+}
+
+func (v *DB) UsernameAvalaible(ctx context.Context, username string) error {
+	users, _, err := v.ListUsers(ctx, types.UserCreate{Username: username}, types.Pagination{Limit: 1, ShowDeleted: true})
+	if err != nil {
+		return ctxerr.QuickWrap(ctx, err)
+	}
+	if len(users) > 0 {
+		return ctxerr.NewHTTP(ctx, "", "Username is not avalaible", http.StatusBadRequest, "Username is not avalaible")
+	}
+	return nil
 }
