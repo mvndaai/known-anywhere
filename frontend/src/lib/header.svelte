@@ -4,7 +4,7 @@
 </script>
 
 <header>
-    <a href="/"><h1>Known Socially</h1></a>
+    <a class='icon' href="/"><h1>Known Socially</h1></a>
     <Search />
     <Profile />
 </header>
@@ -12,8 +12,8 @@
 <style>
     @import './theme.css';
     header {
-        background-color: var(--color-dark);
-        color: var(--color-white);
+        background-color: var(--header-background-color);
+        color: var(--header-text-color);
         text-align: center;
         position: fixed;
         top: 0;
@@ -29,8 +29,8 @@
         align-items: center;
         padding: 0 1rem;
 
-        a {
-            color: var(--color-white);
+        .icon {
+            color: var(--header-text-color);
             text-decoration: none;
         }
     }

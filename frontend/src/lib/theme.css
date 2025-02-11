@@ -1,10 +1,18 @@
 :root {
-    --color-a-primary: #007bff;
-    --color-a-hover: #0056b3;
-    --color-a-active: #0056b3;
-    --color-a-disabled: #b3d7ff;
+    --header-background-color: #000;
+    --header-text-color: #fff;
+    --header-height: 50px;
 
-    --color-primary: #007bff;
+    /*--button-border-radius: 0.25rem;*/
+    --text-color: #343a40;
+    --background-color: #fff;
+
+    --text-color-a-primary: #007bff;
+    --text-color-a-hover: #0056b3;
+    --text-color-a-active: #0056b3;
+    --text-color-a-disabled: #b3d7ff;
+
+    /*--color-primary: #007bff;
     --color-secondary: #6c757d;
     --color-success: #28a745;
     --color-info: #17a2b8;
@@ -33,10 +41,9 @@
     --color-gray-dark-rgb: 52, 58, 64;
     --color-gray-light-rgb: 248, 249, 250;
     --color-gray-lighter-rgb: 241, 243, 245;
-    --color-gray-lightest-rgb: 248, 249, 250;
+    --color-gray-lightest-rgb: 248, 249, 250;*/
     --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --header-height: 50px;
+    /*--font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;*/
 }
 
 /* General CSS */
@@ -45,30 +52,30 @@ body {
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
-    color: var(--color-gray-dark);
+    color: var(--text-color);
     text-align: left;
-    background-color: var(--color-white);
+    background-color: var(--background-color);
     margin: 1rem;
     padding-top: var(--header-height);
 }
 
 a {
-    color: var(--color-a-primary);
+    color: var(--text-color-a-primary);
     text-decoration: none;
     background-color: transparent;
     margin: 0 0.2rem;
     -webkit-text-decoration-skip: objects;
 }
 a:hover {
-    color: var(--color-a-hover);
+    color: var(--text-color-a-hover);
     text-decoration: underline;
 }
 a:active {
-    color: var(--color-a-active);
+    color: var(--text-color-a-active);
     text-decoration: underline;
 }
 a:disabled {
-    color: var(--color-a-disabled);
+    color: var(--text-color-a-disabled);
 }
 
 button {
