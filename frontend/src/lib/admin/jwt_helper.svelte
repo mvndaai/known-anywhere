@@ -1,14 +1,13 @@
 <script>
-    const ls = (typeof window !== 'undefined') ? window.localStorage : null;
     const backend = 'http://localhost:8080';
 
 
-    let subject = $state(ls?.getItem('subject') || '');
-    let username = $state(ls?.getItem('username') || '');
-    let days = $state(ls?.getItem('days') || 5);
+    let subject = $state(localStorage?.getItem('subject') || '');
+    let username = $state(localStorage?.getItem('username') || '');
+    let days = $state(localStorage?.getItem('days') || 5);
     const generateJWT = async () => {
-        ls?.setItem('subject', subject);
-        ls?.setItem('username', username);
+        localStorage?.setItem('subject', subject);
+        localStorage?.setItem('username', username);
         const response = await fetch(`${backend}/api/test/jwt`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -21,7 +20,7 @@
         const j = await response.json();
         //console.log(j);
         if (response.status === 200) {
-            ls?.setItem('jwt', j.data);
+            localStorage?.setItem('jwt', j.data);
         }
     }
 </script>
@@ -37,7 +36,7 @@
     <div>
         <span>Test JWT auth</span>
         <button onclick={async () => {
-            const jwt = ls?.getItem('jwt');
+            const jwt = localStorage?.getItem('jwt');
             console.log(jwt);
             const response = await fetch(`${backend}/api/test/auth`, {
                 headers: {'Authorization': `Bearer ${jwt}`},

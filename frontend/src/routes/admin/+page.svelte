@@ -1,8 +1,6 @@
 <script>
     import Header from "../../lib/header.svelte";
-
     const backend = 'http://localhost:8080'
-    const ls = (typeof window !== 'undefined') ? window.localStorage : null;
 
     // Create Domain
     let domainDisplayName = $state('');
@@ -37,7 +35,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${ls?.getItem('jwt')}`,
+                    'Authorization': `Bearer ${localStorage?.getItem('jwt')}`,
                 },
                 body: JSON.stringify({
                     'display_name': domainDisplayName,
@@ -97,7 +95,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${ls?.getItem('jwt')}`,
+                    'Authorization': `Bearer ${localStorage?.getItem('jwt')}`,
                 },
                 body: JSON.stringify({
                     'username': userUsername,
