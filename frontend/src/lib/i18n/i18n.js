@@ -45,13 +45,11 @@ const formatString = (str, args) => {
 };
 
 const i18n = async (keys, count, args) => {
-    // Todo get Accept-Language header
-    const langs = []
+    const langs = [...(navigator.languages || [navigator.language])];
     if (!langs.includes(defaultLang)){
-        // Add fallback to default language
+        // Add fallback to default language in case we have no translations for the user's language
         langs.push(defaultLang)
     }
-
     for (const lang of langs) {
         const v = await getString(lang, keys, count, args)
         if (v) {
@@ -59,9 +57,6 @@ const i18n = async (keys, count, args) => {
         }
     }
     console.error("missing i18n", keys, count)
-    return null;
 };
-
-
 
 export { i18n };
