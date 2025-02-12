@@ -1,16 +1,8 @@
 <script>
-    import { onMount } from "svelte";
+    
     import Header from "../lib/header.svelte";
 
-    const backend = 'http://localhost:8080';
-    let routes = $state({});
-
-    onMount(async function() {
-        const response = await fetch(`${backend}/api/test/list`);
-        let j = await response.json();
-        //console.log(j);
-        routes = j.data;
-    });
+    
 </script>
 
 <svelte:head>
@@ -20,20 +12,6 @@
 <Header />
 
 
-<h2> Links </h2>
-<a href="/admin/request">Requests</a>
-<a href="/admin">Admin</a>
-
-<h2>Routes</h2>
-{#each Object.entries(routes) as [route, methods]}
-    <ul>
-        {#if methods.includes('GET') }
-            <a href={route}>{route}</a> - {methods}
-        {:else}
-            {route} - {methods}
-        {/if}
-    </ul>
-{/each}
 
 <h2>Welcome to SvelteKit</h2>
 <p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>

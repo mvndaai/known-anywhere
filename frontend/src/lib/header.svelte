@@ -1,6 +1,24 @@
 <script>
+  import Dialog from "./dialog.svelte";
   import Profile from "./header_profile.svelte";
   import Search from "./search.svelte";
+  import { onMount } from 'svelte';
+  import Themer from "./themer.svelte";
+
+  let dialogOpen = $state(false);
+
+  const handleKeydown = (event) => {
+    if (event.key === '/' && !document.activeElement.matches('input, textarea')) {
+        dialogOpen = true;;
+    }
+  };
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+    };
+  });
 </script>
 
 <header>
@@ -8,6 +26,13 @@
     <Search />
     <Profile />
 </header>
+<Dialog bind:open={dialogOpen}>
+    <h1>Theme</h1>
+    <Themer />
+    <h1>Admin links</h1>
+    <a href="/admin/request">Requests</a>
+    <a href="/admin">Admin</a>
+</Dialog>
 
 <style>
     @import './theme.css';
