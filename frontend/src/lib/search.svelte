@@ -1,4 +1,5 @@
 <script>
+    import I18n from "./i18n/I18n.svelte";
     let text = $state('');
     let select = $state('username');
 
@@ -14,13 +15,13 @@
 <div class="search-bar">
     <form onsubmit={search}>
         <select bind:value={select}>
-            <option value="username">Username</option>
-            <option value="coupon">Coupons</option>
-            <option value="name">Name/Alias</option> <!-- TODO is there a better word for a name or alias Moniker-->
+            <option value="username"><I18n key="search.select.username"/></option>
+            <option value="coupon"><I18n key="search.select.coupon"/></option>
+            <option value="name"><I18n key="search.select.name"/></option> <!-- TODO is there a better word for a name or alias Moniker-->
             <!--<option>Domain</option>-->
         </select>
-        <input type="text" placeholder="Search" bind:value={text}/>
-        <button type="submit" disabled={text === ''}>Search</button>
+        <input type="text" placeholder="Search" bind:value={text}/> <!-- TODO figure out how to i18n a placeholder-->
+        <button type="submit" disabled={text === ''}><I18n key="search.search"/></button>
     </form>
 </div>
 

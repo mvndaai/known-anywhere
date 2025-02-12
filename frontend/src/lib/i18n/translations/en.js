@@ -11,6 +11,14 @@ export default {
             multi: "There are {0} things"
         }
     },
+    search : {
+        search: "Search",
+        select:{
+            username: "Username",
+            coupon: "Coupon",
+            name: "Name/Alias",
+        },
+    },
     home: {
         welcome: "Welcome",
         overview: "Known Socially is a platform to let find your favorite people on any social platform and support them by using their coupon codes.",
