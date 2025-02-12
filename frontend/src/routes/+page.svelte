@@ -1,5 +1,6 @@
 <script>
-    import Header from "../lib/header.svelte";
+  import Header from "../lib/header.svelte";
+  import I18n from "$lib/i18n/I18n.svelte";
 </script>
 
 <svelte:head>
@@ -13,20 +14,27 @@
 <p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
 -->
 
-<h1>Welcome</h1>
-<p>Known Socially is a platform to let find your favorite people on any social platform and support them by using their coupon codes.</p>
+<h1><I18n key="home.welcome"/></h1>
+<p><I18n key="home.overview"/></p>
 
-<h2>How it works</h2>
-<p>Create a 'group' and then add links and coupons to that group</p>
-<p>When you log in you can create a group for yoursef and verify that your the links</p>
-<p>Share the group with your followers and they can support you by using your coupon codes</p>
+<h2><I18n key="home.howItWorks"/></h2>
+<p><I18n key="home.createGroup"/></p>
+<p><I18n key="home.logIn"/></p>
+<p><I18n key="home.shareGroup"/></p>
 
-<h2>Features</h2>
+<h2><I18n key="home.features"/></h2>
 <ul>
-	<li>Search for people by username, name or coupon code</li>
-	<li>Search for coupon codes by domain</li>
-	<!--<li>Follow groups </li>-->
-	<!--<li>Show coupons from those you follow when </li>-->
-	<!--<li>Notifications when a group you follow adds a new coupon or link</li>-->
-	<!--<li>Groups not linked to a user can be linked to other groups</li>-->
+  <li><I18n key="home.searchPeople"/></li>
+  <li><I18n key="home.searchCoupons"/></li>
+  <!--<li><I18n key="home.followGroups"/></li>-->
+  <!--<li><I18n key="home.showCoupons"/></li>-->
+  <!--<li><I18n key="home.notifications"/></li>-->
+  <!--<li><I18n key="home.linkGroups"/></li>-->
 </ul>
+
+
+<!--
+<I18n key="test.string"/><br/>
+<I18n key="test.withCount" count=1 args={[1]}/><br/>
+<I18n key="test.withCount" count=0 args={[0]}/><br/>
+-->
