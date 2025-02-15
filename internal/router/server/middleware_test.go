@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/mvndaai/ctxerr"
-	"github.com/mvndaai/known-socially/internal/router/server"
+	"github.com/mvndaai/known-anywhere/internal/router/server"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

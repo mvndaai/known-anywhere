@@ -15,7 +15,7 @@
 
 <svelte:head>
 	<title>Search </title>
-	<!--<meta name="description" content="Known socially" />-->
+	<!--<meta name="description" content="Known anywhere" />-->
 </svelte:head>
 <Header />
 

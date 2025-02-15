@@ -8,9 +8,9 @@ import (
 
 	"github.com/mvndaai/ctxerr"
 	ctxerrhttp "github.com/mvndaai/ctxerr/http"
-	"github.com/mvndaai/known-socially/internal/config"
-	"github.com/mvndaai/known-socially/internal/db"
-	"github.com/mvndaai/known-socially/internal/jwt"
+	"github.com/mvndaai/known-anywhere/internal/config"
+	"github.com/mvndaai/known-anywhere/internal/db"
+	"github.com/mvndaai/known-anywhere/internal/jwt"
 )
 
 func JWTMiddleware(db *db.DB) func(http.HandlerFunc) http.HandlerFunc {

@@ -5,7 +5,7 @@ package main
 
 import (
 	"github.com/mvndaai/ctxerr"
-	"github.com/mvndaai/known-socially/internal/router"
+	"github.com/mvndaai/known-anywhere/internal/router"
 )
 
 func main() {

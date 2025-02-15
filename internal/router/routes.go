@@ -6,11 +6,11 @@ import (
 	"net/http"
 
 	"github.com/mvndaai/ctxerr"
-	"github.com/mvndaai/known-socially/internal/config"
-	"github.com/mvndaai/known-socially/internal/db"
-	"github.com/mvndaai/known-socially/internal/jwt"
-	"github.com/mvndaai/known-socially/internal/router/server"
-	"github.com/mvndaai/known-socially/internal/types"
+	"github.com/mvndaai/known-anywhere/internal/config"
+	"github.com/mvndaai/known-anywhere/internal/db"
+	"github.com/mvndaai/known-anywhere/internal/jwt"
+	"github.com/mvndaai/known-anywhere/internal/router/server"
+	"github.com/mvndaai/known-anywhere/internal/types"
 	"github.com/mvndaai/validjson"
 )
 
@@ -39,7 +39,7 @@ func StartServer() error {
 			GenericToHTTP: GenericToHTTP,
 		},
 		server.DocConfig{
-			ServiceName: "known-socially",
+			ServiceName: "known-anywhere",
 			Description: "Link social media accounts",
 			Version:     "0.0.1",
 		})

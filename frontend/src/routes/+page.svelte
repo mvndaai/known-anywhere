@@ -5,7 +5,7 @@
 
 <svelte:head>
 	<title>Home</title>
-	<meta name="description" content="Known socially" />
+	<meta name="description" content="Known anywhere" />
 </svelte:head>
 <Header />
 

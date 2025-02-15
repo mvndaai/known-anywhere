@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/mvndaai/ctxerr"
-	"github.com/mvndaai/known-socially/internal/jwt"
-	"github.com/mvndaai/known-socially/internal/types"
+	"github.com/mvndaai/known-anywhere/internal/jwt"
+	"github.com/mvndaai/known-anywhere/internal/types"
 )
 
 const (

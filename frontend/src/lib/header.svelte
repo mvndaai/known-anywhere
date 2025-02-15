@@ -22,7 +22,7 @@
 </script>
 
 <header>
-    <a class='icon' href="/"><h1>Known Socially</h1></a>
+    <a class='icon' href="/"><h1>Known Anywhere</h1></a>
     <Search />
     <Profile />
 </header>

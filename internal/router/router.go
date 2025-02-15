@@ -7,7 +7,7 @@ import (
 
 	"github.com/mvndaai/ctxerr"
 	ctxerrhttp "github.com/mvndaai/ctxerr/http"
-	"github.com/mvndaai/known-socially/internal/config"
+	"github.com/mvndaai/known-anywhere/internal/config"
 )
 
 type (

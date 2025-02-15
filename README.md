@@ -1,4 +1,4 @@
-# known-socially
+# known-anywhere
 
 App for aggregating social media accounts
 

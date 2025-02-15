@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/mvndaai/known-socially/internal/router/server"
+	"github.com/mvndaai/known-anywhere/internal/router/server"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -26,7 +26,7 @@ go.work.sum
 docker/private_local_vars.sh
 
 # binary/build
-known-socially
+known-anywhere
 bin/frontend
 
 

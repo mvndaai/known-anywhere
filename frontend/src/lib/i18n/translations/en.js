@@ -21,7 +21,7 @@ export default {
     },
     home: {
         welcome: "Welcome",
-        overview: "Known Socially is a platform to let find your favorite people on any social platform and support them by using their coupon codes.",
+        overview: "Known Anywhere is a platform to let find your favorite people on any social platform and support them by using their coupon codes.",
         howItWorks: "How it works",
         createGroup: "Create a 'group' and then add links and coupons to that group",
         logIn: "When you log in you can create a group for yourself and verify that your the links",

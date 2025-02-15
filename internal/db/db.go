@@ -11,8 +11,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/mvndaai/ctxerr"
-	"github.com/mvndaai/known-socially/internal/config"
-	"github.com/mvndaai/known-socially/internal/types"
+	"github.com/mvndaai/known-anywhere/internal/config"
+	"github.com/mvndaai/known-anywhere/internal/types"
 )
 
 type DB struct {

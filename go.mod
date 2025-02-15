@@ -1,6 +1,6 @@
-module github.com/mvndaai/known-socially
+module github.com/mvndaai/known-anywhere
 
-go 1.23.3
+go 1.24
 
 require (
 	github.com/getkin/kin-openapi v0.129.0

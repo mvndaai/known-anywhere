@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/mvndaai/ctxerr"
-	"github.com/mvndaai/known-socially/internal/db"
+	"github.com/mvndaai/known-anywhere/internal/db"
 )
 
 type Handler struct {

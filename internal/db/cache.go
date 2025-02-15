@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/mvndaai/known-socially/internal/types"
+	"github.com/mvndaai/known-anywhere/internal/types"
 	"github.com/patrickmn/go-cache"
 )
 

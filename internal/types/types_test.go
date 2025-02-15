@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/mvndaai/known-socially/internal/types"
+	"github.com/mvndaai/known-anywhere/internal/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
