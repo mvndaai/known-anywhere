@@ -18,7 +18,6 @@
             <option value="username"><I18n key="search.select.username"/></option>
             <option value="coupon"><I18n key="search.select.coupon"/></option>
             <option value="name"><I18n key="search.select.name"/></option> <!-- TODO is there a better word for a name or alias Moniker-->
-            <!--<option>Domain</option>-->
         </select>
         <input type="text" placeholder="Search" bind:value={text}/> <!-- TODO figure out how to i18n a placeholder-->
         <button type="submit" disabled={text === ''}><I18n key="search.search"/></button>
