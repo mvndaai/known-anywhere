@@ -13,6 +13,7 @@ if ! git diff-index --quiet HEAD --; then
   exit 1
 fi
 
+./docker/build_frontend.sh
 pushd bin/frontend || exit 1
 commit_hash=$(git rev-parse --short HEAD)
 git init
