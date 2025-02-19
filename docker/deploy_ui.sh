@@ -17,6 +17,8 @@ fi
 pushd bin/frontend || exit 1
 commit_hash=$(git rev-parse --short HEAD)
 git init
+echo ".DS_Store" > .gitignore
+echo "knownanywhere.com" > CNAME
 git add .
 git commit -m "$commit_hash"
 git checkout -B deployed-frontend

@@ -1,7 +1,6 @@
 //import adapter from '@sveltejs/adapter-auto';
 import adapter from '@sveltejs/adapter-static';
 
-
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	kit: {
@@ -12,7 +11,12 @@ const config = {
 			pages: '../bin/frontend',
 			assets: '../bin/frontend',
 			//fallback: '/api' // may differ from host to host
-		})
+		}),
+		appDir: 'app', // Change the directory for build files. Github didn't like /_app/
+		//prerender: {
+		//	//crawl: true,
+		//	entries: ['*']
+		//},
 	}
 };
 
